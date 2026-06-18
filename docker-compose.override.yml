@@ -1,0 +1,14 @@
+# Local development overrides — not used in production
+services:
+  server:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoDb__DatabaseName=confer_dev
+      - Jwt__SecretKey=dev-only-secret-key-min-32-characters-long
+      - Jwt__ExpiryMinutes=480
+    ports:
+      - "8080:8080"
+
+  mongo:
+    ports:
+      - "27017:27017"

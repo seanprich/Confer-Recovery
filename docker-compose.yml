@@ -1,0 +1,88 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: src/Server/Dockerfile
+    image: spqc-confer-server:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDb__ConnectionString=mongodb://mongo:27017
+      - MongoDb__DatabaseName=confer
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=spqc-confer
+      - Jwt__Audience=spqc-confer-clients
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - server-logs:/app/logs
+    networks:
+      - confer-net
+
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=confer
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - confer-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    depends_on:
+      - server
+    networks:
+      - confer-net
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-changeme}
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - confer-net
+
+volumes:
+  mongo-data:
+  server-logs:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  confer-net:
+    driver: bridge

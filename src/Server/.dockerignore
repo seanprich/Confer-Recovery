@@ -1,0 +1,8 @@
+**/bin
+**/obj
+**/logs
+**/.vs
+**/.git
+**/node_modules
+**/appsettings.Development.json
+**/*.user

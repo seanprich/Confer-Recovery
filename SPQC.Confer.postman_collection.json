@@ -1,0 +1,1132 @@
+{
+  "info": {
+    "_postman_id": "spqc-confer-server-diagnostics",
+    "name": "SPQC Confer — Server Diagnostics",
+    "description": "End-to-end diagnostic suite for the SPQC Confer self-hosted server.\n\n## Before you run\n\n**Bootstrap requirement:** the server has no public signup endpoint — every account is admin-provisioned. You must create the first OrgAdmin directly in MongoDB before running this collection:\n\n```js\ndb.members.insertOne({\n  displayName: 'Org Admin',\n  email: 'admin@spqc.org',\n  passwordHash: '<bcrypt hash of your password>',\n  chapterId: ObjectId().toString(),   // placeholder; update after chapter is created\n  role: 'OrgAdmin',\n  status: 'Active',\n  createdAt: new Date()\n})\n```\n\nOr use mongosh with the companion seed script (not yet in repo).\n\n## Running order\n\nFolders are numbered and designed to run top-to-bottom. Variables are captured automatically by the test scripts — run the whole collection with the Collection Runner, or execute folders in sequence manually.\n\n## Collection variables\n\nEdit these in the Variables tab before running:\n- `baseUrl` — server address (default: `http://localhost:8080`)\n- `orgAdminEmail` / `orgAdminPassword` — credentials for the seeded OrgAdmin\n- `hostEmail` / `hostPassword` — desired credentials for the host member created during setup\n- `memberEmail` / `memberPassword` — desired credentials for the listener member\n\nAll other variables (`orgAdminToken`, `chapterId`, `roomId`, etc.) are captured automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",           "value": "http://localhost:8080", "type": "string" },
+    { "key": "orgAdminEmail",     "value": "admin@spqc.org",        "type": "string" },
+    { "key": "orgAdminPassword",  "value": "changeme123!",          "type": "string" },
+    { "key": "hostEmail",         "value": "host@spqc.org",         "type": "string" },
+    { "key": "hostPassword",      "value": "hostpassword12!",       "type": "string" },
+    { "key": "memberEmail",       "value": "member@spqc.org",       "type": "string" },
+    { "key": "memberPassword",    "value": "memberpassword12!",     "type": "string" },
+    { "key": "orgAdminToken",     "value": "",                      "type": "string" },
+    { "key": "hostToken",         "value": "",                      "type": "string" },
+    { "key": "memberToken",       "value": "",                      "type": "string" },
+    { "key": "chapterId",         "value": "",                      "type": "string" },
+    { "key": "memberId",          "value": "",                      "type": "string" },
+    { "key": "hostMemberId",      "value": "",                      "type": "string" },
+    { "key": "roomId",            "value": "",                      "type": "string" },
+    { "key": "liveKitToken",      "value": "",                      "type": "string" },
+    { "key": "sfuUrl",            "value": "",                      "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔍 Diagnostics",
+      "description": "Server health and API schema checks. These should pass before running anything else.",
+      "item": [
+        {
+          "name": "OpenAPI spec reachable",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/openapi/v1.json",
+            "description": "Verifies the server is up and the OpenAPI document is being served. Only available in Development environment."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response time < 2 s', () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test('Content-Type is JSON', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json'));",
+                  "const doc = pm.response.json();",
+                  "pm.test('Has openapi version', () => pm.expect(doc).to.have.property('openapi'));",
+                  "pm.test('Has paths object', () => pm.expect(doc).to.have.property('paths'));",
+                  "pm.test('Auth login path exists', () => pm.expect(doc.paths).to.have.property('/api/auth/login'));",
+                  "pm.test('Rooms path exists', () => pm.expect(doc.paths).to.have.property('/api/rooms'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown route returns 404",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/does-not-exist",
+            "description": "Confirms the server is routing correctly and returns 404 for unknown paths rather than a 200 with an error body."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Protected endpoint rejects unauthenticated request",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/members?chapterId=000000000000000000000000",
+            "description": "Confirms JWT middleware is active — no token should yield 401, not 200 or 500."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Response time < 1 s', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "1️⃣  OrgAdmin — Login",
+      "description": "Log in as the seeded OrgAdmin. Captures `orgAdminToken` for all subsequent admin calls.",
+      "item": [
+        {
+          "name": "Login as OrgAdmin",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{orgAdminEmail}}\",\n  \"password\": \"{{orgAdminPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response time < 3 s', () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has accessToken', () => pm.expect(body).to.have.property('accessToken'));",
+                  "pm.test('Has expiresAt', () => pm.expect(body).to.have.property('expiresAt'));",
+                  "pm.test('Role is OrgAdmin', () => pm.expect(body.role).to.equal('OrgAdmin'));",
+                  "pm.test('Has chapterId', () => pm.expect(body).to.have.property('chapterId'));",
+                  "pm.collectionVariables.set('orgAdminToken', body.accessToken);",
+                  "console.log('orgAdminToken captured:', body.accessToken.substring(0, 20) + '...');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login with wrong password → 401",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{orgAdminEmail}}\",\n  \"password\": \"definitely-wrong-password\"\n}"
+            },
+            "description": "Verifies that wrong credentials produce 401, not 200 or 500."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has error field', () => pm.expect(body).to.have.property('error'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login with invalid email format → 400",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-an-email\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Validates DataAnnotations are enforced before hitting the service layer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "2️⃣  Chapters",
+      "description": "Chapter management. Requires OrgAdmin role. Captures `chapterId`.",
+      "item": [
+        {
+          "name": "Create Chapter",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/chapters",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Chapter\",\n  \"sfuUrl\": \"wss://chapter-a.example.duckdns.org\",\n  \"liveKitApiKey\": \"APItest12345\",\n  \"liveKitApiSecret\": \"super-secret-livekit-key-for-testing\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has id', () => pm.expect(body).to.have.property('id'));",
+                  "pm.test('Name matches', () => pm.expect(body.name).to.equal('Downtown Chapter'));",
+                  "pm.test('Status is Active', () => pm.expect(body.status).to.equal('Active'));",
+                  "pm.test('Secret NOT in response', () => pm.expect(JSON.stringify(body)).to.not.include('secret'));",
+                  "pm.collectionVariables.set('chapterId', body.id);",
+                  "console.log('chapterId captured:', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Active Chapters",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/chapters",
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns array', () => pm.expect(body).to.be.an('array'));",
+                  "pm.test('Created chapter is listed', () => {",
+                  "  const chapId = pm.collectionVariables.get('chapterId');",
+                  "  pm.expect(body.some(c => c.id === chapId)).to.be.true;",
+                  "});",
+                  "pm.test('Secrets not in list response', () => {",
+                  "  pm.expect(JSON.stringify(body)).to.not.include('Secret');",
+                  "  pm.expect(JSON.stringify(body)).to.not.include('secret');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Chapter by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/chapters/{{chapterId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('ID matches', () => pm.expect(body.id).to.equal(pm.collectionVariables.get('chapterId')));",
+                  "pm.test('Has sfuUrl', () => pm.expect(body).to.have.property('sfuUrl'));",
+                  "pm.test('Has liveKitApiKey', () => pm.expect(body).to.have.property('liveKitApiKey'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Non-Existent Chapter → 404",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/chapters/000000000000000000000000",
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update SFU Config",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/chapters/{{chapterId}}/sfu",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Chapter\",\n  \"sfuUrl\": \"wss://chapter-a-updated.example.duckdns.org\",\n  \"liveKitApiKey\": \"APItest12345\",\n  \"liveKitApiSecret\": \"updated-super-secret-livekit-key-for-testing\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Set Chapter Inactive then Active",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/chapters/{{chapterId}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "\"Inactive\"" },
+            "description": "Sets chapter inactive. Run again manually with body `\"Active\"` to re-activate before the room tests."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Re-activate Chapter",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/chapters/{{chapterId}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "\"Active\"" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid status value → 400",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/chapters/{{chapterId}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "\"NotARealStatus\"" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "3️⃣  Members",
+      "description": "Member provisioning. Requires ChapterAdmin or OrgAdmin. Captures `memberId` and `hostMemberId`.",
+      "item": [
+        {
+          "name": "Create Listener Member",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/members",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Jane Listener\",\n  \"email\": \"{{memberEmail}}\",\n  \"password\": \"{{memberPassword}}\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"role\": \"Listener\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has id', () => pm.expect(body).to.have.property('id'));",
+                  "pm.test('Status is Pending', () => pm.expect(body.status).to.equal('Pending'));",
+                  "pm.test('Role is Listener', () => pm.expect(body.role).to.equal('Listener'));",
+                  "pm.test('Password NOT in response', () => pm.expect(JSON.stringify(body)).to.not.include('password'));",
+                  "pm.test('PasswordHash NOT in response', () => pm.expect(JSON.stringify(body)).to.not.include('Hash'));",
+                  "pm.collectionVariables.set('memberId', body.id);",
+                  "console.log('memberId captured:', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Host Member",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/members",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Bob Host\",\n  \"email\": \"{{hostEmail}}\",\n  \"password\": \"{{hostPassword}}\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"role\": \"Host\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Role is Host', () => pm.expect(body.role).to.equal('Host'));",
+                  "pm.collectionVariables.set('hostMemberId', body.id);",
+                  "console.log('hostMemberId captured:', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate email → 409",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/members",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Jane Duplicate\",\n  \"email\": \"{{memberEmail}}\",\n  \"password\": \"{{memberPassword}}\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"role\": \"Listener\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has error message', () => pm.expect(body).to.have.property('error'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approve Listener (Pending → Active)",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/members/{{memberId}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Active\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approve Host (Pending → Active)",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/members/{{hostMemberId}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Active\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Members by Chapter",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/members?chapterId={{chapterId}}",
+              "query": [{ "key": "chapterId", "value": "{{chapterId}}" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns array', () => pm.expect(body).to.be.an('array'));",
+                  "pm.test('At least 2 members', () => pm.expect(body.length).to.be.at.least(2));",
+                  "pm.test('No password hashes leaked', () => {",
+                  "  pm.expect(JSON.stringify(body)).to.not.match(/passwordHash|PasswordHash/);",
+                  "});",
+                  "const listener = body.find(m => m.id === pm.collectionVariables.get('memberId'));",
+                  "pm.test('Listener status is Active', () => pm.expect(listener.status).to.equal('Active'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Member by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('ID matches', () => pm.expect(body.id).to.equal(pm.collectionVariables.get('memberId')));",
+                  "pm.test('Has displayName', () => pm.expect(body).to.have.property('displayName'));",
+                  "pm.test('Has email', () => pm.expect(body).to.have.property('email'));",
+                  "pm.test('Has role', () => pm.expect(body).to.have.property('role'));",
+                  "pm.test('Has consentAcknowledged', () => pm.expect(body).to.have.property('consentAcknowledged'));",
+                  "pm.test('Consent not yet acknowledged', () => pm.expect(body.consentAcknowledged).to.be.false);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Non-Existent Member → 404",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/members/000000000000000000000000",
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Member Role (Listener → Presenter)",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/members/{{memberId}}/role",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"Presenter\"\n}" },
+            "description": "Upgrades listener to presenter. Revert after if needed."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revert Member Role (Presenter → Listener)",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/members/{{memberId}}/role",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"Listener\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "4️⃣  Auth — Member Flows",
+      "description": "Member login and consent acknowledgement. Captures `hostToken` and `memberToken`.",
+      "item": [
+        {
+          "name": "Login as Host",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{hostEmail}}\",\n  \"password\": \"{{hostPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Role is Host', () => pm.expect(body.role).to.equal('Host'));",
+                  "pm.test('Token is non-empty JWT', () => {",
+                  "  pm.expect(body.accessToken).to.be.a('string');",
+                  "  pm.expect(body.accessToken.split('.')).to.have.length(3);",
+                  "});",
+                  "pm.collectionVariables.set('hostToken', body.accessToken);",
+                  "console.log('hostToken captured');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as Listener",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{memberEmail}}\",\n  \"password\": \"{{memberPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Role is Listener', () => pm.expect(body.role).to.equal('Listener'));",
+                  "pm.collectionVariables.set('memberToken', body.accessToken);",
+                  "console.log('memberToken captured');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Join Room Without Consent → 403",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/000000000000000000000001/join",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }],
+            "description": "The listener has not acknowledged consent yet — must be blocked. Room ID is a placeholder; any valid-format ID works since consent is checked first."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 (consent not acknowledged)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Acknowledge Consent (Listener)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/consent",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{memberToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"v1.0\"",
+              "description": "Body is a plain JSON string — the consent policy version."
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                  "pm.test('Empty body', () => pm.expect(pm.response.text()).to.equal(''));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Acknowledge Consent (Host)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/consent",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "\"v1.0\"" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consent acknowledged — verify on member record",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{orgAdminToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('consentAcknowledged is now true', () => pm.expect(body.consentAcknowledged).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "5️⃣  Rooms",
+      "description": "Room lifecycle: create → start → join → end. Captures `roomId`, `liveKitToken`, and `sfuUrl`.",
+      "item": [
+        {
+          "name": "Create Room",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Weekly Tuesday Meeting\",\n  \"chapterId\": \"{{chapterId}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has id', () => pm.expect(body).to.have.property('id'));",
+                  "pm.test('Status is Scheduled', () => pm.expect(body.status).to.equal('Scheduled'));",
+                  "pm.test('LobbyEnabled is true', () => pm.expect(body.lobbyEnabled).to.be.true);",
+                  "pm.test('MaxVideoPublishers is 10', () => pm.expect(body.maxVideoPublishers).to.equal(10));",
+                  "pm.test('MaxParticipants is 110', () => pm.expect(body.maxParticipants).to.equal(110));",
+                  "pm.collectionVariables.set('roomId', body.id);",
+                  "console.log('roomId captured:', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Rooms by Chapter",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms?chapterId={{chapterId}}",
+              "query": [{ "key": "chapterId", "value": "{{chapterId}}" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns array', () => pm.expect(body).to.be.an('array'));",
+                  "const room = body.find(r => r.id === pm.collectionVariables.get('roomId'));",
+                  "pm.test('Created room is listed', () => pm.expect(room).to.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Room by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('ID matches', () => pm.expect(body.id).to.equal(pm.collectionVariables.get('roomId')));",
+                  "pm.test('Status is Scheduled', () => pm.expect(body.status).to.equal('Scheduled'));",
+                  "pm.test('startedAt is null', () => pm.expect(body.startedAt).to.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Start Room",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/start",
+            "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Status is Active', () => pm.expect(body.status).to.equal('Active'));",
+                  "pm.test('startedAt is set', () => pm.expect(body.startedAt).to.not.be.null);",
+                  "pm.test('endedAt is null', () => pm.expect(body.endedAt).to.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Start Already-Active Room → 404",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/start",
+            "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }],
+            "description": "RoomService.StartAsync returns null if not in Scheduled state. Controller maps this to 404."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 (already active)', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Join Room — Host",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/join",
+            "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Has liveKitToken', () => pm.expect(body).to.have.property('liveKitToken'));",
+                  "pm.test('liveKitToken is a JWT (3 parts)', () => {",
+                  "  pm.expect(body.liveKitToken.split('.')).to.have.length(3);",
+                  "});",
+                  "pm.test('Has sfuUrl', () => pm.expect(body).to.have.property('sfuUrl'));",
+                  "pm.test('Has roomName', () => pm.expect(body).to.have.property('roomName'));",
+                  "pm.test('Has tokenExpiresAt', () => pm.expect(body).to.have.property('tokenExpiresAt'));",
+                  "pm.test('sfuUrl starts with wss://', () => pm.expect(body.sfuUrl).to.match(/^wss:\\/\\//));",
+                  "pm.collectionVariables.set('liveKitToken', body.liveKitToken);",
+                  "pm.collectionVariables.set('sfuUrl', body.sfuUrl);",
+                  "// Decode and inspect the LiveKit JWT claims",
+                  "const [, payload] = body.liveKitToken.split('.');",
+                  "const claims = JSON.parse(atob(payload));",
+                  "pm.test('LiveKit token has video grant', () => pm.expect(claims).to.have.property('video'));",
+                  "pm.test('Host can publish', () => pm.expect(claims.video.canPublish).to.be.true);",
+                  "pm.test('Host can subscribe', () => pm.expect(claims.video.canSubscribe).to.be.true);",
+                  "pm.test('LiveKit token has name claim', () => pm.expect(claims).to.have.property('name'));",
+                  "pm.test('LiveKit token roomJoin is true', () => pm.expect(claims.video.roomJoin).to.be.true);",
+                  "console.log('SFU URL:', body.sfuUrl);",
+                  "console.log('LiveKit room:', claims.video.room);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Join Room — Listener",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/join",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "const [, payload] = body.liveKitToken.split('.');",
+                  "const claims = JSON.parse(atob(payload));",
+                  "pm.test('Listener cannot publish', () => pm.expect(claims.video.canPublish).to.be.false);",
+                  "pm.test('Listener can subscribe', () => pm.expect(claims.video.canSubscribe).to.be.true);",
+                  "pm.test('Same room as host', () => {",
+                  "  const hostClaims = JSON.parse(atob(pm.collectionVariables.get('liveKitToken').split('.')[1]));",
+                  "  pm.expect(claims.video.room).to.equal(hostClaims.video.room);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "End Room",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/end",
+            "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Status is Ended', () => pm.expect(body.status).to.equal('Ended'));",
+                  "pm.test('endedAt is set', () => pm.expect(body.endedAt).to.not.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Join Ended Room → 403",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/join",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }],
+            "description": "CanMemberJoinAsync returns false for non-Active rooms."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 (room not active)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "6️⃣  Security Assertions",
+      "description": "Spot-checks confirming authorization boundaries are enforced correctly.",
+      "item": [
+        {
+          "name": "Listener cannot create a room → 403",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/rooms",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{memberToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unauthorized Room\",\n  \"chapterId\": \"{{chapterId}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 (Listener cannot create room)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listener cannot list all members → 403",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/members?chapterId={{chapterId}}",
+              "query": [{ "key": "chapterId", "value": "{{chapterId}}" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 (Listener cannot list members)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Member cannot see another member's record → 403",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/members/{{hostMemberId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }],
+            "description": "MembersController.GetById checks that non-admins can only retrieve their own record."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 (cannot see other member)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Member cannot access chapter admin endpoints → 403",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/chapters",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 (OrgAdmin only)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired / malformed token → 401",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer not.a.valid.jwt.token" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 (bad token)', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+
+  ]
+}

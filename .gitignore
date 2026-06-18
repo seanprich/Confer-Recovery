@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+
+# .NET user files
+*.user
+*.suo
+.vs/
+
+# Runtime artifacts
+logs/
+*.log
+
+# Secrets — commit .env.example, never .env
+.env
+
+# Nested git repo (empty, not a submodule)
+Confer-Recovery/
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
