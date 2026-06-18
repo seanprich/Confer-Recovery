@@ -1,17 +1,17 @@
 ﻿{
   "info": {
-    "_postman_id": "spqc-confer-server-diagnostics",
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "ConferRecovery — Server Diagnostics",
-    "description": "End-to-end diagnostic suite for the ConferRecovery self-hosted server.\n\n## Before you run\n\n**Bootstrap requirement:** the server has no public signup endpoint — every account is admin-provisioned. You must create the first OrgAdmin directly in MongoDB before running this collection:\n\n```js\ndb.members.insertOne({\n  displayName: 'Org Admin',\n  email: 'admin@spqc.org',\n  passwordHash: '<bcrypt hash of your password>',\n  chapterId: ObjectId().toString(),   // placeholder; update after chapter is created\n  role: 'OrgAdmin',\n  status: 'Active',\n  createdAt: new Date()\n})\n```\n\nOr use mongosh with the companion seed script (not yet in repo).\n\n## Running order\n\nFolders are numbered and designed to run top-to-bottom. Variables are captured automatically by the test scripts — run the whole collection with the Collection Runner, or execute folders in sequence manually.\n\n## Collection variables\n\nEdit these in the Variables tab before running:\n- `baseUrl` — server address (default: `http://localhost:8080`)\n- `orgAdminEmail` / `orgAdminPassword` — credentials for the seeded OrgAdmin\n- `hostEmail` / `hostPassword` — desired credentials for the host member created during setup\n- `memberEmail` / `memberPassword` — desired credentials for the listener member\n\nAll other variables (`orgAdminToken`, `chapterId`, `roomId`, etc.) are captured automatically.",
+    "description": "End-to-end diagnostic suite for the ConferRecovery self-hosted server.\n\n## Before you run\n\n**Bootstrap requirement:** the server has no public signup endpoint — every account is admin-provisioned. You must create the first OrgAdmin directly in MongoDB before running this collection:\n\n```js\ndb.members.insertOne({\n  displayName: 'Org Admin',\n  email: 'admin@conferrecovery.org',\n  passwordHash: '<bcrypt hash of your password>',\n  chapterId: ObjectId().toString(),   // placeholder; update after chapter is created\n  role: 'OrgAdmin',\n  status: 'Active',\n  createdAt: new Date()\n})\n```\n\nOr use mongosh with the companion seed script (not yet in repo).\n\n## Running order\n\nFolders are numbered and designed to run top-to-bottom. Variables are captured automatically by the test scripts — run the whole collection with the Collection Runner, or execute folders in sequence manually.\n\n## Collection variables\n\nEdit these in the Variables tab before running:\n- `baseUrl` — server address (default: `http://localhost:8080`)\n- `orgAdminEmail` / `orgAdminPassword` — credentials for the seeded OrgAdmin\n- `hostEmail` / `hostPassword` — desired credentials for the host member created during setup\n- `memberEmail` / `memberPassword` — desired credentials for the listener member\n\nAll other variables (`orgAdminToken`, `chapterId`, `roomId`, etc.) are captured automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl",           "value": "http://localhost:8080", "type": "string" },
-    { "key": "orgAdminEmail",     "value": "smartrecoverysean@proton.me",        "type": "string" },
-    { "key": "orgAdminPassword",  "value": "changeme123!",          "type": "string" },
-    { "key": "hostEmail",         "value": "host@spqc.org",         "type": "string" },
-    { "key": "hostPassword",      "value": "hostpassword12!",       "type": "string" },
-    { "key": "memberEmail",       "value": "member@spqc.org",       "type": "string" },
+    { "key": "orgAdminEmail",     "value": "admin@conferrecovery.org",  "type": "string" },
+    { "key": "orgAdminPassword",  "value": "changeme123!",           "type": "string" },
+    { "key": "hostEmail",         "value": "host@conferrecovery.org", "type": "string" },
+    { "key": "hostPassword",      "value": "hostpassword12!",        "type": "string" },
+    { "key": "memberEmail",       "value": "member@conferrecovery.org", "type": "string" },
     { "key": "memberPassword",    "value": "memberpassword12!",     "type": "string" },
     { "key": "orgAdminToken",     "value": "",                      "type": "string" },
     { "key": "hostToken",         "value": "",                      "type": "string" },
