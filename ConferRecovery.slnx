@@ -1,0 +1,10 @@
+﻿<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Server/">
+    <Project Path="src/Server/ConferRecovery.Server.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+  <Folder Name="/test/Tests/">
+    <Project Path="test/Tests/ConferRecovery.Tests.csproj" />
+  </Folder>
+</Solution>

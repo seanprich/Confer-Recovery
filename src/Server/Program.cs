@@ -1,15 +1,15 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using OpenTelemetry.Metrics;
 using Serilog;
-using SPQC.Confer.SelfHosted.Server.Configuration;
-using SPQC.Confer.SelfHosted.Server.Middleware;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Server.Services;
-using SPQC.Confer.SelfHosted.Server.Telemetry;
+using ConferRecovery.Server.Configuration;
+using ConferRecovery.Server.Middleware;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Server.Services;
+using ConferRecovery.Server.Telemetry;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -137,7 +137,7 @@ try
         Predicate = check => check.Tags.Contains("ready")
     }).AllowAnonymous();
 
-    Log.Information("SPQC Confer Server starting on {Env}", app.Environment.EnvironmentName);
+    Log.Information("ConferRecovery Server starting on {Env}", app.Environment.EnvironmentName);
     app.Run();
 }
 catch (Exception ex)

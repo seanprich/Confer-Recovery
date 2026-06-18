@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Rooms;
+namespace ConferRecovery.Server.DTOs.Rooms;
 
 public sealed record CreateRoomRequest(
     [Required, StringLength(120)] string Name,

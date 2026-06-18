@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Members;
+namespace ConferRecovery.Server.DTOs.Members;
 
 public sealed record UpdateMemberStatusRequest([Required] string Status);
 

@@ -1,10 +1,10 @@
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Tests.Fixtures;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Tests.Fixtures;
 
-namespace SPQC.Confer.SelfHosted.Tests.Repositories;
+namespace ConferRecovery.Tests.Repositories;
 
 public sealed class MemberRepositoryTests : IAsyncLifetime
 {

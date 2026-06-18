@@ -1,8 +1,8 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace SPQC.Confer.SelfHosted.Server.Repositories;
+namespace ConferRecovery.Server.Repositories;
 
 public class MongoRepository<T> : IRepository<T>
 {

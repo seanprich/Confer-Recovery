@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SPQC.Confer.SelfHosted.Server.DTOs.Auth;
-using SPQC.Confer.SelfHosted.Server.Services;
+using ConferRecovery.Server.DTOs.Auth;
+using ConferRecovery.Server.Services;
 
-namespace SPQC.Confer.SelfHosted.Server.Controllers;
+namespace ConferRecovery.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

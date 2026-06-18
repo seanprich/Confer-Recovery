@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.Telemetry;
+﻿namespace ConferRecovery.Server.Telemetry;
 
 public interface IConferMetrics
 {

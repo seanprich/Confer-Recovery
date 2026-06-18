@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.Middleware;
+﻿namespace ConferRecovery.Server.Middleware;
 
 /// <summary>
 /// Logs every authenticated request at Info level — path, method, caller identity.

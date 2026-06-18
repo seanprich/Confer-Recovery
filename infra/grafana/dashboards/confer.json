@@ -1,7 +1,7 @@
-{
+﻿{
   "id": null,
   "uid": "spqc-confer-telemetry",
-  "title": "SPQC Confer",
+  "title": "ConferRecovery",
   "description": "Self-hosted chapter meeting platform — local telemetry only, no cloud",
   "tags": ["confer", "self-hosted"],
   "timezone": "browser",

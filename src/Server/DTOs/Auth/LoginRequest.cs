@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Auth;
+namespace ConferRecovery.Server.DTOs.Auth;
 
 public sealed record LoginRequest(
     [Required, EmailAddress] string Email,

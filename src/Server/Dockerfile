@@ -1,12 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY ["src/Server/SPQC.Confer.SelfHosted.Server.csproj", "src/Server/"]
-RUN dotnet restore "src/Server/SPQC.Confer.SelfHosted.Server.csproj"
+COPY ["src/Server/ConferRecovery.Server.csproj", "src/Server/"]
+RUN dotnet restore "src/Server/ConferRecovery.Server.csproj"
 
 COPY . .
 WORKDIR "/src/src/Server"
-RUN dotnet publish "SPQC.Confer.SelfHosted.Server.csproj" \
+RUN dotnet publish "ConferRecovery.Server.csproj" \
     -c Release -o /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
@@ -26,4 +26,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8080/healthz || exit 1
 
-ENTRYPOINT ["dotnet", "SPQC.Confer.SelfHosted.Server.dll"]
+ENTRYPOINT ["dotnet", "ConferRecovery.Server.dll"]

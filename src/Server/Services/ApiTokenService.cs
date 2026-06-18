@@ -1,11 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using SPQC.Confer.SelfHosted.Server.Configuration;
-using SPQC.Confer.SelfHosted.Server.Models;
+using ConferRecovery.Server.Configuration;
+using ConferRecovery.Server.Models;
 
-namespace SPQC.Confer.SelfHosted.Server.Services;
+namespace ConferRecovery.Server.Services;
 
 public sealed class ApiTokenService : IApiTokenService
 {

@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.DataProtection;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Repositories;
+﻿using Microsoft.AspNetCore.DataProtection;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Repositories;
 
-namespace SPQC.Confer.SelfHosted.Server.Services;
+namespace ConferRecovery.Server.Services;
 
 public sealed class ChapterService : IChapterService
 {

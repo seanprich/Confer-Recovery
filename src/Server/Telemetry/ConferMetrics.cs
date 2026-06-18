@@ -1,10 +1,10 @@
-using System.Diagnostics.Metrics;
+﻿using System.Diagnostics.Metrics;
 
-namespace SPQC.Confer.SelfHosted.Server.Telemetry;
+namespace ConferRecovery.Server.Telemetry;
 
 public sealed class ConferMetrics : IConferMetrics
 {
-    public const string MeterName = "SPQC.Confer";
+    public const string MeterName = "ConferRecovery";
 
     private readonly UpDownCounter<int> _activeRooms;
     private readonly Counter<int> _roomsCreated;

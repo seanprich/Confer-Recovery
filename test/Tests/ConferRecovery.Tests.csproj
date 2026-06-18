@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Server\SPQC.Confer.SelfHosted.Server.csproj" />
+    <ProjectReference Include="..\..\src\Server\ConferRecovery.Server.csproj" />
   </ItemGroup>
 
 </Project>

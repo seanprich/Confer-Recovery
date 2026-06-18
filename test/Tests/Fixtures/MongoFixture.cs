@@ -1,7 +1,7 @@
-using EphemeralMongo;
+﻿using EphemeralMongo;
 using MongoDB.Driver;
 
-namespace SPQC.Confer.SelfHosted.Tests.Fixtures;
+namespace ConferRecovery.Tests.Fixtures;
 
 /// <summary>
 /// Spins up a real MongoDB process per test class. Each fixture instance gets its

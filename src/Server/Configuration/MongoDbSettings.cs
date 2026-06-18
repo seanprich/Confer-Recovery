@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.Configuration;
+﻿namespace ConferRecovery.Server.Configuration;
 
 public sealed class MongoDbSettings
 {
