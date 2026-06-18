@@ -7,7 +7,7 @@
   },
   "variable": [
     { "key": "baseUrl",           "value": "http://localhost:8080", "type": "string" },
-    { "key": "orgAdminEmail",     "value": "admin@spqc.org",        "type": "string" },
+    { "key": "orgAdminEmail",     "value": "smartrecoverysean@proton.me",        "type": "string" },
     { "key": "orgAdminPassword",  "value": "changeme123!",          "type": "string" },
     { "key": "hostEmail",         "value": "host@spqc.org",         "type": "string" },
     { "key": "hostPassword",      "value": "hostpassword12!",       "type": "string" },
