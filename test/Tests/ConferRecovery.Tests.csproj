@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Desktop\ConferRecovery.Desktop.Application\ConferRecovery.Desktop.Application.csproj" />
+    <ProjectReference Include="..\..\src\Desktop\ConferRecovery.Desktop.Contracts\ConferRecovery.Desktop.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Desktop\ConferRecovery.Desktop.Infrastructure\ConferRecovery.Desktop.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Security\ConferRecovery.Security.csproj" />
     <ProjectReference Include="..\..\src\Server\ConferRecovery.Server.csproj" />
   </ItemGroup>

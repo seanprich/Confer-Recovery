@@ -16,7 +16,7 @@ public sealed class MembersController : ControllerBase
 
     public MembersController(IMemberService members) => _members = members;
 
-    [HttpGet]
+    [HttpGet(Name = "MembersGetByChapter")]
     [Authorize(Roles = "ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<IReadOnlyList<MemberResponse>>> GetByChapter(
         [FromQuery] string chapterId, CancellationToken ct)
@@ -28,7 +28,7 @@ public sealed class MembersController : ControllerBase
         return Ok(members.Select(ToResponse).ToList());
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "MembersGetById")]
     public async Task<ActionResult<MemberResponse>> GetById(string id, CancellationToken ct)
     {
         var member = await _members.GetByIdAsync(id, ct);
@@ -45,7 +45,7 @@ public sealed class MembersController : ControllerBase
         return Ok(ToResponse(member));
     }
 
-    [HttpPost]
+    [HttpPost(Name = "MembersCreate")]
     [Authorize(Roles = "ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<MemberResponse>> Create(
         [FromBody] CreateMemberRequest request, CancellationToken ct)
@@ -69,7 +69,7 @@ public sealed class MembersController : ControllerBase
         }
     }
 
-    [HttpPut("{id}/status")]
+    [HttpPut("{id}/status", Name = "MembersUpdateStatus")]
     [Authorize(Roles = "ChapterAdmin,OrgAdmin")]
     public async Task<IActionResult> UpdateStatus(
         string id, [FromBody] UpdateMemberStatusRequest request, CancellationToken ct)
@@ -87,7 +87,7 @@ public sealed class MembersController : ControllerBase
         return await _members.UpdateStatusAsync(id, status, ct) ? NoContent() : NotFound();
     }
 
-    [HttpPut("{id}/role")]
+    [HttpPut("{id}/role", Name = "MembersUpdateRole")]
     [Authorize(Roles = "OrgAdmin")]
     public async Task<IActionResult> UpdateRole(
         string id, [FromBody] UpdateMemberRoleRequest request, CancellationToken ct)

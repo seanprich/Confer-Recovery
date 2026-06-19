@@ -175,13 +175,43 @@ dotnet run
 
 The API starts at `http://localhost:5000` (or as configured in `launchSettings.json`).
 
+### Contributor quickstart
+
+If you are new to this repository, start here:
+
+1. `AGENTS.md` — architecture conventions, lessons learned, and contributor checklist.
+2. `docs/DesktopApiClient.md` — generated client workflow and where to write custom code.
+3. Run a full build and tests before opening a PR:
+
+```bash
+dotnet build ConferRecovery.slnx
+dotnet test
+```
+
 ### Running tests
 
 ```bash
 dotnet test
 ```
 
-49 tests — unit tests use NSubstitute mocks; integration tests use EphemeralMongo6 (embedded MongoDB, no external dependency).
+151 tests — unit tests use NSubstitute mocks; integration tests use EphemeralMongo6 (embedded MongoDB, no external dependency).
+
+### Coverage highlights
+
+- Desktop application and adapter layers have targeted 100% statement coverage in key files:
+  - `src/Desktop/ConferRecovery.Desktop.Application/Auth/AuthenticationService.cs`
+  - `src/Desktop/ConferRecovery.Desktop.Infrastructure/Auth/ApiAuthClient.cs`
+  - `src/Desktop/ConferRecovery.Desktop.Infrastructure/Chapters/ApiChaptersClient.cs`
+  - `src/Desktop/ConferRecovery.Desktop.Infrastructure/Members/ApiMembersClient.cs`
+  - `src/Desktop/ConferRecovery.Desktop.Infrastructure/Rooms/ApiRoomsClient.cs`
+  - `src/Desktop/ConferRecovery.Desktop.Application/DependencyInjection/ServiceCollectionExtensions.cs`
+  - `src/Desktop/ConferRecovery.Desktop.Infrastructure/DependencyInjection/ServiceCollectionExtensions.cs`
+
+Generate focused coverage locally:
+
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+```
 
 ---
 

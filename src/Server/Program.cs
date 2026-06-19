@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -21,6 +22,8 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+    LoadDotEnvAndBridgeVariables();
+
     var builder = WebApplication.CreateBuilder(args);
 
     builder.WebHost.ConfigureKestrel(options =>
@@ -35,10 +38,33 @@ try
             retainedFileCountLimit: 30));
 
     // ── Configuration ─────────────────────────────────────────────────────────
-    var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbSettings>()
-        ?? throw new InvalidOperationException("MongoDb configuration is required.");
-    var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
-        ?? throw new InvalidOperationException("Jwt configuration is required.");
+    var mongoSection = builder.Configuration.GetSection("MongoDb");
+    var mongoSettings = new MongoDbSettings
+    {
+        ConnectionString = mongoSection["ConnectionString"] ?? "mongodb://localhost:27017",
+        DatabaseName = mongoSection["DatabaseName"] ?? "confer",
+        Username = mongoSection["Username"]
+            ?? Environment.GetEnvironmentVariable("MongoDb__Username")
+            ?? Environment.GetEnvironmentVariable("MONGO_USERNAME"),
+        Password = mongoSection["Password"]
+            ?? Environment.GetEnvironmentVariable("MongoDb__Password")
+            ?? Environment.GetEnvironmentVariable("MONGO_PASSWORD")
+    };
+
+    var jwtSection = builder.Configuration.GetSection("Jwt");
+    var jwtSettings = new JwtSettings
+    {
+        SecretKey = jwtSection["SecretKey"]
+            ?? Environment.GetEnvironmentVariable("Jwt__SecretKey")
+            ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+            ?? string.Empty,
+        Issuer = jwtSection["Issuer"] ?? "confer",
+        Audience = jwtSection["Audience"] ?? "confer-clients",
+        ExpiryMinutes = int.TryParse(jwtSection["ExpiryMinutes"], out var expiryMinutes)
+            ? expiryMinutes
+            : 60
+    };
+
     if (Encoding.UTF8.GetByteCount(jwtSettings.SecretKey) < 32)
         throw new InvalidOperationException(
             "Jwt:SecretKey must be at least 32 bytes (256 bits) for HMAC-SHA256.");
@@ -141,7 +167,20 @@ try
     });
 
     builder.Services.AddControllers();
-    builder.Services.AddOpenApi();
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddOperationTransformer((operation, context, _) =>
+        {
+            if (context.Description.ActionDescriptor is not ControllerActionDescriptor actionDescriptor)
+                return Task.CompletedTask;
+
+            operation.OperationId = string.IsNullOrWhiteSpace(actionDescriptor.AttributeRouteInfo?.Name)
+                ? $"{actionDescriptor.ControllerName}_{actionDescriptor.ActionName}"
+                : actionDescriptor.AttributeRouteInfo!.Name!;
+
+            return Task.CompletedTask;
+        });
+    });
 
     var app = builder.Build();
 
@@ -182,4 +221,73 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+static void LoadDotEnvAndBridgeVariables()
+{
+    var dotEnvPath = FindDotEnvPath();
+    if (dotEnvPath is null)
+    {
+        return;
+    }
+
+    foreach (var line in File.ReadAllLines(dotEnvPath, Encoding.UTF8))
+    {
+        var trimmed = line.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith('#'))
+        {
+            continue;
+        }
+
+        var splitIndex = trimmed.IndexOf('=');
+        if (splitIndex <= 0)
+        {
+            continue;
+        }
+
+        var key = trimmed[..splitIndex].Trim();
+        var value = trimmed[(splitIndex + 1)..].Trim();
+
+        if ((value.StartsWith('"') && value.EndsWith('"')) ||
+            (value.StartsWith('\'') && value.EndsWith('\'')))
+        {
+            value = value[1..^1];
+        }
+
+        SetEnvIfMissing(key, value);
+    }
+
+    SetEnvIfMissing("MongoDb__Username", Environment.GetEnvironmentVariable("MONGO_USERNAME"));
+    SetEnvIfMissing("MongoDb__Password", Environment.GetEnvironmentVariable("MONGO_PASSWORD"));
+    SetEnvIfMissing("Jwt__SecretKey", Environment.GetEnvironmentVariable("JWT_SECRET_KEY"));
+}
+
+static string? FindDotEnvPath()
+{
+    var current = new DirectoryInfo(Directory.GetCurrentDirectory());
+    while (current is not null)
+    {
+        var candidate = Path.Combine(current.FullName, ".env");
+        if (File.Exists(candidate))
+        {
+            return candidate;
+        }
+
+        current = current.Parent;
+    }
+
+    return null;
+}
+
+static void SetEnvIfMissing(string key, string? value)
+{
+    if (string.IsNullOrWhiteSpace(key) || value is null)
+    {
+        return;
+    }
+
+    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+    {
+        Environment.SetEnvironmentVariable(key, value);
+    }
 }

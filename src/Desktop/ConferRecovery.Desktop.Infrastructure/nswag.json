@@ -1,0 +1,29 @@
+{
+  "runtime": "Net80",
+  "defaultVariables": "Configuration=Debug,OpenApiFile=../../Server/obj/Debug/net10.0/EndpointInfo/ConferRecovery.Server.json",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "$(OpenApiFile)",
+      "newLineBehavior": "Auto"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "{controller}Client",
+      "namespace": "ConferRecovery.Desktop.Infrastructure.Generated",
+      "operationGenerationMode": "MultipleClientsFromFirstTagAndOperationId",
+      "generateClientInterfaces": true,
+      "generateOptionalParameters": true,
+      "generateExceptionClasses": true,
+      "exceptionClass": "ConferApiException",
+      "injectHttpClient": true,
+      "disposeHttpClient": false,
+      "useBaseUrl": false,
+      "generateBaseUrlProperty": false,
+      "generateSyncMethods": false,
+      "parameterDateTimeFormat": "s",
+      "jsonLibrary": "NewtonsoftJson",
+      "output": "Generated/ConferApiClient.g.cs"
+    }
+  }
+}

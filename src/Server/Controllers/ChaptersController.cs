@@ -15,21 +15,21 @@ public sealed class ChaptersController : ControllerBase
 
     public ChaptersController(IChapterService chapters) => _chapters = chapters;
 
-    [HttpGet]
+    [HttpGet(Name = "ChaptersGetActive")]
     public async Task<ActionResult<IReadOnlyList<ChapterResponse>>> GetActive(CancellationToken ct)
     {
         var chapters = await _chapters.GetAllActiveAsync(ct);
         return Ok(chapters.Select(ToResponse).ToList());
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "ChaptersGetById")]
     public async Task<ActionResult<ChapterResponse>> GetById(string id, CancellationToken ct)
     {
         var chapter = await _chapters.GetByIdAsync(id, ct);
         return chapter is null ? NotFound() : Ok(ToResponse(chapter));
     }
 
-    [HttpPost]
+    [HttpPost(Name = "ChaptersCreate")]
     public async Task<ActionResult<ChapterResponse>> Create(
         [FromBody] CreateChapterRequest request, CancellationToken ct)
     {
@@ -38,7 +38,7 @@ public sealed class ChaptersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = chapter.Id }, ToResponse(chapter));
     }
 
-    [HttpPut("{id}/sfu")]
+    [HttpPut("{id}/sfu", Name = "ChaptersUpdateSfu")]
     public async Task<IActionResult> UpdateSfu(
         string id, [FromBody] CreateChapterRequest request, CancellationToken ct)
     {
@@ -47,7 +47,7 @@ public sealed class ChaptersController : ControllerBase
         return updated ? NoContent() : NotFound();
     }
 
-    [HttpPut("{id}/status")]
+    [HttpPut("{id}/status", Name = "ChaptersSetStatus")]
     public async Task<IActionResult> SetStatus(
         string id, [FromBody] string status, CancellationToken ct)
     {
