@@ -1,7 +1,7 @@
-using MongoDB.Driver;
-using SPQC.Confer.SelfHosted.Server.Models;
+﻿using MongoDB.Driver;
+using ConferRecovery.Server.Models;
 
-namespace SPQC.Confer.SelfHosted.Server.Repositories;
+namespace ConferRecovery.Server.Repositories;
 
 public sealed class AuditRepository : MongoRepository<AuditEvent>, IAuditRepository
 {

@@ -1,8 +1,8 @@
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Server.Telemetry;
+﻿using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Server.Telemetry;
 
-namespace SPQC.Confer.SelfHosted.Server.Services;
+namespace ConferRecovery.Server.Services;
 
 public sealed class RoomService : IRoomService
 {

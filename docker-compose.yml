@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: src/Server/Dockerfile
-    image: spqc-confer-server:latest
+    image: confer-server:latest
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -12,14 +12,24 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - MongoDb__ConnectionString=mongodb://mongo:27017
       - MongoDb__DatabaseName=confer
+      - MongoDb__Username=${MONGO_USERNAME}
+      - MongoDb__Password=${MONGO_PASSWORD}
       - Jwt__SecretKey=${JWT_SECRET_KEY}
-      - Jwt__Issuer=spqc-confer
-      - Jwt__Audience=spqc-confer-clients
+      - Jwt__Issuer=confer
+      - Jwt__Audience=confer-clients
+      - Seed__AdminEmail=${SEED_ADMIN_EMAIL:-}
+      - Seed__AdminPassword=${SEED_ADMIN_PASSWORD:-}
+      - Seed__AdminDisplayName=${SEED_ADMIN_DISPLAY_NAME:-Admin}
+      - Seed__ChapterName=${SEED_CHAPTER_NAME:-Default Chapter}
+      - Seed__SfuUrl=${SEED_SFU_URL:-}
+      - Seed__LiveKitApiKey=${SEED_LIVEKIT_API_KEY:-}
+      - Seed__LiveKitApiSecret=${SEED_LIVEKIT_API_SECRET:-}
     depends_on:
       mongo:
         condition: service_healthy
     volumes:
       - server-logs:/app/logs
+      - server-keys:/app/keys
     networks:
       - confer-net
 
@@ -28,12 +38,14 @@ services:
     restart: unless-stopped
     environment:
       - MONGO_INITDB_DATABASE=confer
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - mongo-data:/data/db
     networks:
       - confer-net
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ["CMD-SHELL", "mongosh --quiet -u \"$$MONGO_INITDB_ROOT_USERNAME\" -p \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -80,6 +92,7 @@ services:
 volumes:
   mongo-data:
   server-logs:
+  server-keys:
   prometheus-data:
   grafana-data:
 

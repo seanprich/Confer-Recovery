@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Rooms;
+﻿namespace ConferRecovery.Server.DTOs.Rooms;
 
 public sealed record RoomResponse(
     string Id,

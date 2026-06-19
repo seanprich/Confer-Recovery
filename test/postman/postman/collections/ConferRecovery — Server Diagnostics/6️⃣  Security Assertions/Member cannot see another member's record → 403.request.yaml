@@ -1,0 +1,10 @@
+$kind: http-request
+description: MembersController.GetById checks that non-admins can only retrieve their own record.
+url: "{{baseUrl}}/api/members/{{hostMemberId}}"
+method: GET
+headers:
+  Authorization: Bearer {{memberToken}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 403 (cannot see other member)', () => pm.response.to.have.status(403));
+order: 3000

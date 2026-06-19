@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Chapters;
+﻿namespace ConferRecovery.Server.DTOs.Chapters;
 
 public sealed record ChapterResponse(
     string Id,

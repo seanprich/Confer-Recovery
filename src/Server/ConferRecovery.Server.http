@@ -1,0 +1,6 @@
+﻿@ConferRecovery.Server_HostAddress = http://localhost:5132
+
+GET {{ConferRecovery.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

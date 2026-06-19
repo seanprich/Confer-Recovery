@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Server.Services;
-using SPQC.Confer.SelfHosted.Server.Telemetry;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Server.Services;
+using ConferRecovery.Server.Telemetry;
 
-namespace SPQC.Confer.SelfHosted.Tests.Services;
+namespace ConferRecovery.Tests.Services;
 
 public sealed class RoomServiceTests
 {

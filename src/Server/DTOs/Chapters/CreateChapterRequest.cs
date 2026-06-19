@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Chapters;
+namespace ConferRecovery.Server.DTOs.Chapters;
 
 public sealed record CreateChapterRequest(
     [Required, StringLength(120)] string Name,

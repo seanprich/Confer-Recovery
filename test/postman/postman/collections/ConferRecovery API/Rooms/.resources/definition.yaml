@@ -1,0 +1,3 @@
+$kind: collection
+name: Rooms
+description: 'Room lifecycle management. Create/Start/End require Host, ChapterAdmin, or OrgAdmin. Join requires any authenticated member who has acknowledged consent.'

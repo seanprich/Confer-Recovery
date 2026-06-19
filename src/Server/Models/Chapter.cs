@@ -1,7 +1,7 @@
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace SPQC.Confer.SelfHosted.Server.Models;
+namespace ConferRecovery.Server.Models;
 
 public sealed class Chapter
 {

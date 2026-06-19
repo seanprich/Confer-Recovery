@@ -1,6 +1,6 @@
-using SPQC.Confer.SelfHosted.Server.Models;
+﻿using ConferRecovery.Server.Models;
 
-namespace SPQC.Confer.SelfHosted.Server.Repositories;
+namespace ConferRecovery.Server.Repositories;
 
 public interface IRoomRepository : IRepository<Room>
 {

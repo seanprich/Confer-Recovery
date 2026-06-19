@@ -1,0 +1,9 @@
+$kind: http-request
+name: End Room
+method: POST
+url: '{{baseUrl}}/api/rooms/{{roomId}}/end'
+order: 6000
+description: 'End a room (transitions status to Ended). Requires Host, ChapterAdmin, or OrgAdmin. Returns 200 with updated room.'
+headers:
+  - key: Authorization
+    value: 'Bearer {{hostToken}}'

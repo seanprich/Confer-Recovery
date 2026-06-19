@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Members;
+﻿namespace ConferRecovery.Server.DTOs.Members;
 
 public sealed record MemberResponse(
     string Id,

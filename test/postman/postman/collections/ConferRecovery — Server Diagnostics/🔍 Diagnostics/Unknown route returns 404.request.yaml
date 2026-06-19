@@ -1,0 +1,8 @@
+$kind: http-request
+description: Confirms the server is routing correctly and returns 404 for unknown paths rather than a 200 with an error body.
+url: "{{baseUrl}}/api/does-not-exist"
+method: GET
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 404', () => pm.response.to.have.status(404));
+order: 2000

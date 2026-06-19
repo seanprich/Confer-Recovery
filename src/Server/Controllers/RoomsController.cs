@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SPQC.Confer.SelfHosted.Server.DTOs.Rooms;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Services;
+using ConferRecovery.Server.DTOs.Rooms;
+using ConferRecovery.Server.Extensions;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Services;
 
-namespace SPQC.Confer.SelfHosted.Server.Controllers;
+namespace ConferRecovery.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -33,6 +34,10 @@ public sealed class RoomsController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<RoomResponse>>> GetByChapter(
         [FromQuery] string chapterId, CancellationToken ct)
     {
+        // ChapterAdmin may only query their own chapter; OrgAdmin unrestricted
+        if (User.IsChapterAdmin() && !User.IsOrgAdmin() && User.ChapterId() != chapterId)
+            return Forbid();
+
         var rooms = await _rooms.GetByChapterAsync(chapterId, ct);
         return Ok(rooms.Select(ToResponse).ToList());
     }
@@ -49,7 +54,11 @@ public sealed class RoomsController : ControllerBase
     public async Task<ActionResult<RoomResponse>> Create(
         [FromBody] CreateRoomRequest request, CancellationToken ct)
     {
-        var hostId = User.FindFirst("sub")?.Value;
+        // ChapterAdmin and Host may only create rooms in their own chapter
+        if (!User.IsOrgAdmin() && User.ChapterId() != request.ChapterId)
+            return Forbid();
+
+        var hostId = User.MemberId();
         if (hostId is null) return Unauthorized();
 
         var room = await _rooms.CreateAsync(request.ChapterId, hostId, request.Name, request.ScheduledAt, ct);
@@ -60,16 +69,26 @@ public sealed class RoomsController : ControllerBase
     [Authorize(Roles = "Host,ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<RoomResponse>> Start(string id, CancellationToken ct)
     {
-        var room = await _rooms.StartAsync(id, ct);
-        return room is null ? NotFound() : Ok(ToResponse(room));
+        var room = await _rooms.GetByIdAsync(id, ct);
+        if (room is null) return NotFound();
+
+        if (!IsAuthorizedForRoom(room)) return Forbid();
+
+        var updated = await _rooms.StartAsync(id, ct);
+        return updated is null ? Conflict(new { error = "Room is not in Scheduled state." }) : Ok(ToResponse(updated));
     }
 
     [HttpPost("{id}/end")]
     [Authorize(Roles = "Host,ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<RoomResponse>> End(string id, CancellationToken ct)
     {
-        var room = await _rooms.EndAsync(id, ct);
-        return room is null ? NotFound() : Ok(ToResponse(room));
+        var room = await _rooms.GetByIdAsync(id, ct);
+        if (room is null) return NotFound();
+
+        if (!IsAuthorizedForRoom(room)) return Forbid();
+
+        var updated = await _rooms.EndAsync(id, ct);
+        return updated is null ? Conflict(new { error = "Room is not in Active state." }) : Ok(ToResponse(updated));
     }
 
     /// <summary>
@@ -79,7 +98,7 @@ public sealed class RoomsController : ControllerBase
     [HttpPost("{id}/join")]
     public async Task<ActionResult<JoinRoomResponse>> Join(string id, CancellationToken ct)
     {
-        var memberId = User.FindFirst("sub")?.Value;
+        var memberId = User.MemberId();
         if (memberId is null) return Unauthorized();
 
         var member = await _members.GetByIdAsync(memberId, ct);
@@ -106,6 +125,16 @@ public sealed class RoomsController : ControllerBase
             SfuUrl: chapter.SfuUrl,
             RoomName: room.LiveKitRoomName,
             TokenExpiresAt: DateTime.UtcNow.AddMinutes(expiryMinutes)));
+    }
+
+    // OrgAdmin: unrestricted.
+    // ChapterAdmin: only rooms in their chapter.
+    // Host: only rooms they own.
+    private bool IsAuthorizedForRoom(Room room)
+    {
+        if (User.IsOrgAdmin()) return true;
+        if (User.IsChapterAdmin()) return room.ChapterId == User.ChapterId();
+        return room.HostMemberId == User.MemberId();
     }
 
     private static RoomResponse ToResponse(Room r) => new(

@@ -1,0 +1,14 @@
+$kind: http-request
+name: Acknowledge Consent
+method: POST
+url: '{{baseUrl}}/api/auth/consent'
+order: 2000
+description: Record that the authenticated member has acknowledged the consent version. Returns 204.
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: '"1.0"'

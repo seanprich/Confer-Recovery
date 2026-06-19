@@ -1,0 +1,3 @@
+$kind: collection
+description: Spot-checks confirming authorization boundaries are enforced correctly.
+order: 7000

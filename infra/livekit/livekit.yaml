@@ -1,0 +1,14 @@
+# Local development LiveKit config — not for production use
+port: 7880
+
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: false
+
+# API keys: key → secret (secret must be 32+ characters)
+keys:
+  devkey: dev-livekit-secret-for-local-use-only
+
+logging:
+  level: info

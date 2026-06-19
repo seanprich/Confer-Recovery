@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Server.Services;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Server.Services;
 
-namespace SPQC.Confer.SelfHosted.Tests.Services;
+namespace ConferRecovery.Tests.Services;
 
 public sealed class ChapterServiceTests
 {
@@ -13,7 +13,7 @@ public sealed class ChapterServiceTests
 
     // Use real DataProtection so we can verify encrypt/decrypt round-trips
     private readonly IDataProtectionProvider _dpProvider =
-        DataProtectionProvider.Create("spqc-confer-test");
+        DataProtectionProvider.Create("confer-test");
 
     private ChapterService Sut() =>
         new(_repo, _dpProvider, NullLogger<ChapterService>.Instance);

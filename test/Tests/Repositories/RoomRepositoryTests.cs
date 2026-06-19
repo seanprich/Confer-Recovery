@@ -1,9 +1,9 @@
-using MongoDB.Bson;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Tests.Fixtures;
+﻿using MongoDB.Bson;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Tests.Fixtures;
 
-namespace SPQC.Confer.SelfHosted.Tests.Repositories;
+namespace ConferRecovery.Tests.Repositories;
 
 public sealed class RoomRepositoryTests : IAsyncLifetime
 {

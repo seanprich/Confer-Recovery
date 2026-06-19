@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms/{{roomId}}/join"
+method: POST
+headers:
+  Authorization: Bearer {{memberToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      const [, payload] = body.liveKitToken.split('.');
+      const claims = JSON.parse(atob(payload));
+      pm.test('Listener cannot publish', () => pm.expect(claims.video.canPublish).to.be.false);
+      pm.test('Listener can subscribe', () => pm.expect(claims.video.canSubscribe).to.be.true);
+      pm.test('Same room as host', () => {
+        const hostClaims = JSON.parse(atob(pm.collectionVariables.get('liveKitToken').split('.')[1]));
+        pm.expect(claims.video.room).to.equal(hostClaims.video.room);
+      });
+order: 7000

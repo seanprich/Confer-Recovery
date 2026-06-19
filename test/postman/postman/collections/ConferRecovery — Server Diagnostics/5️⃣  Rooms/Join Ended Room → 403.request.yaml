@@ -1,0 +1,10 @@
+$kind: http-request
+description: CanMemberJoinAsync returns false for non-Active rooms.
+url: "{{baseUrl}}/api/rooms/{{roomId}}/join"
+method: POST
+headers:
+  Authorization: Bearer {{memberToken}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 403 (room not active)', () => pm.response.to.have.status(403));
+order: 9000

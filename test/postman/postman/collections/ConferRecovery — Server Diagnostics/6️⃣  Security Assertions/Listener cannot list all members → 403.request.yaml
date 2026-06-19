@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members?chapterId={{chapterId}}"
+method: GET
+headers:
+  Authorization: Bearer {{memberToken}}
+queryParams:
+  chapterId: "{{chapterId}}"
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 403 (Listener cannot list members)', () => pm.response.to.have.status(403));
+order: 2000

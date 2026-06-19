@@ -1,6 +1,6 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
-namespace SPQC.Confer.SelfHosted.Server.Repositories;
+namespace ConferRecovery.Server.Repositories;
 
 public interface IRepository<T>
 {

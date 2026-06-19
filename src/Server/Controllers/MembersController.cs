@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SPQC.Confer.SelfHosted.Server.DTOs.Members;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Services;
+using ConferRecovery.Server.DTOs.Members;
+using ConferRecovery.Server.Extensions;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Services;
 
-namespace SPQC.Confer.SelfHosted.Server.Controllers;
+namespace ConferRecovery.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -20,6 +21,9 @@ public sealed class MembersController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<MemberResponse>>> GetByChapter(
         [FromQuery] string chapterId, CancellationToken ct)
     {
+        if (!User.IsOrgAdmin() && User.ChapterId() != chapterId)
+            return Forbid();
+
         var members = await _members.GetByChapterAsync(chapterId, ct);
         return Ok(members.Select(ToResponse).ToList());
     }
@@ -30,11 +34,13 @@ public sealed class MembersController : ControllerBase
         var member = await _members.GetByIdAsync(id, ct);
         if (member is null) return NotFound();
 
-        // Members can only see their own record unless they are admins
-        var callerId = User.FindFirst("sub")?.Value;
-        var callerRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-        var isAdmin = callerRole is "ChapterAdmin" or "OrgAdmin";
-        if (!isAdmin && callerId != id) return Forbid();
+        var callerId = User.MemberId();
+        if (!User.IsOrgAdmin() && !User.IsChapterAdmin() && callerId != id)
+            return Forbid();
+
+        // ChapterAdmin can only see members in their own chapter
+        if (User.IsChapterAdmin() && !User.IsOrgAdmin() && member.ChapterId != User.ChapterId())
+            return Forbid();
 
         return Ok(ToResponse(member));
     }
@@ -44,6 +50,9 @@ public sealed class MembersController : ControllerBase
     public async Task<ActionResult<MemberResponse>> Create(
         [FromBody] CreateMemberRequest request, CancellationToken ct)
     {
+        if (!User.IsOrgAdmin() && User.ChapterId() != request.ChapterId)
+            return Forbid();
+
         if (!Enum.TryParse<MemberRole>(request.Role, ignoreCase: true, out var role))
             return BadRequest(new { error = $"Unknown role: {request.Role}" });
 
@@ -67,6 +76,13 @@ public sealed class MembersController : ControllerBase
     {
         if (!Enum.TryParse<MemberStatus>(request.Status, ignoreCase: true, out var status))
             return BadRequest(new { error = $"Unknown status: {request.Status}" });
+
+        if (!User.IsOrgAdmin())
+        {
+            var target = await _members.GetByIdAsync(id, ct);
+            if (target is null) return NotFound();
+            if (target.ChapterId != User.ChapterId()) return Forbid();
+        }
 
         return await _members.UpdateStatusAsync(id, status, ct) ? NoContent() : NotFound();
     }

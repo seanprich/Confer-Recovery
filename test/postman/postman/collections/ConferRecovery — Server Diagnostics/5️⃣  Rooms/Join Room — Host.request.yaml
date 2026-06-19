@@ -1,0 +1,31 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms/{{roomId}}/join"
+method: POST
+headers:
+  Authorization: Bearer {{hostToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Has liveKitToken', () => pm.expect(body).to.have.property('liveKitToken'));
+      pm.test('liveKitToken is a JWT (3 parts)', () => {
+        pm.expect(body.liveKitToken.split('.')).to.have.length(3);
+      });
+      pm.test('Has sfuUrl', () => pm.expect(body).to.have.property('sfuUrl'));
+      pm.test('Has roomName', () => pm.expect(body).to.have.property('roomName'));
+      pm.test('Has tokenExpiresAt', () => pm.expect(body).to.have.property('tokenExpiresAt'));
+      pm.test('sfuUrl starts with wss://', () => pm.expect(body.sfuUrl).to.match(/^wss:\/\//));
+      pm.collectionVariables.set('liveKitToken', body.liveKitToken);
+      pm.collectionVariables.set('sfuUrl', body.sfuUrl);
+      // Decode and inspect the LiveKit JWT claims
+      const [, payload] = body.liveKitToken.split('.');
+      const claims = JSON.parse(atob(payload));
+      pm.test('LiveKit token has video grant', () => pm.expect(claims).to.have.property('video'));
+      pm.test('Host can publish', () => pm.expect(claims.video.canPublish).to.be.true);
+      pm.test('Host can subscribe', () => pm.expect(claims.video.canSubscribe).to.be.true);
+      pm.test('LiveKit token has name claim', () => pm.expect(claims).to.have.property('name'));
+      pm.test('LiveKit token roomJoin is true', () => pm.expect(claims.video.roomJoin).to.be.true);
+      console.log('SFU URL:', body.sfuUrl);
+      console.log('LiveKit room:', claims.video.room);
+order: 6000

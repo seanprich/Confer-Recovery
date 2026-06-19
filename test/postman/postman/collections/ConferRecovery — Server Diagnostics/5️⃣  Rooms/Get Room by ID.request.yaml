@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms/{{roomId}}"
+method: GET
+headers:
+  Authorization: Bearer {{hostToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('ID matches', () => pm.expect(body.id).to.equal(pm.collectionVariables.get('roomId')));
+      pm.test('Status is Scheduled', () => pm.expect(body.status).to.equal('Scheduled'));
+      pm.test('startedAt is null', () => pm.expect(body.startedAt).to.be.null);
+order: 3000

@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "{{memberEmail}}",
+      "password": "{{memberPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Role is Listener', () => pm.expect(body.role).to.equal('Listener'));
+      pm.collectionVariables.set('memberToken', body.accessToken);
+      console.log('memberToken captured');
+order: 2000

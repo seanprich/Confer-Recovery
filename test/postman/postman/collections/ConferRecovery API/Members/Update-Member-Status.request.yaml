@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Member Status
+method: PUT
+url: '{{baseUrl}}/api/members/{{memberId}}/status'
+order: 4000
+description: 'Update a member''s status. Valid values: Active, Suspended, Deactivated. Returns 204.'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "status": "Active"
+    }

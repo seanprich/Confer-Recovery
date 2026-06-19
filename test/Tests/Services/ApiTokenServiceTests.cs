@@ -1,12 +1,12 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using SPQC.Confer.SelfHosted.Server.Configuration;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Services;
+using ConferRecovery.Server.Configuration;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Services;
 
-namespace SPQC.Confer.SelfHosted.Tests.Services;
+namespace ConferRecovery.Tests.Services;
 
 public sealed class ApiTokenServiceTests
 {

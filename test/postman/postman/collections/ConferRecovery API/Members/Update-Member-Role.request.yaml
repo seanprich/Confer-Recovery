@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Member Role
+method: PUT
+url: '{{baseUrl}}/api/members/{{memberId}}/role'
+order: 5000
+description: 'Update a member''s role. Requires OrgAdmin. Valid values: Listener, Host, ChapterAdmin, OrgAdmin. Returns 204.'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "role": "Host"
+    }

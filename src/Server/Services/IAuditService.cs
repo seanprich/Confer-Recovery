@@ -1,6 +1,6 @@
-using SPQC.Confer.SelfHosted.Server.Models;
+﻿using ConferRecovery.Server.Models;
 
-namespace SPQC.Confer.SelfHosted.Server.Services;
+namespace ConferRecovery.Server.Services;
 
 public interface IAuditService
 {

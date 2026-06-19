@@ -1,4 +1,4 @@
-namespace SPQC.Confer.SelfHosted.Server.DTOs.Auth;
+﻿namespace ConferRecovery.Server.DTOs.Auth;
 
 public sealed record LoginResponse(
     string AccessToken,

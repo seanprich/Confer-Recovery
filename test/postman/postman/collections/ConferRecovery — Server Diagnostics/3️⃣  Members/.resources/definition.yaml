@@ -1,0 +1,3 @@
+$kind: collection
+description: Member provisioning. Requires ChapterAdmin or OrgAdmin. Captures `memberId` and `hostMemberId`.
+order: 4000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members/{{memberId}}"
+method: GET
+headers:
+  Authorization: Bearer {{orgAdminToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('consentAcknowledged is now true', () => pm.expect(body.consentAcknowledged).to.be.true);
+order: 6000

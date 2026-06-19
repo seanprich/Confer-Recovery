@@ -1,0 +1,10 @@
+$kind: http-request
+description: The listener has not acknowledged consent yet — must be blocked. Room ID is a placeholder; any valid-format ID works since consent is checked first.
+url: "{{baseUrl}}/api/rooms/000000000000000000000001/join"
+method: POST
+headers:
+  Authorization: Bearer {{memberToken}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 403 (consent not acknowledged)', () => pm.response.to.have.status(403));
+order: 3000

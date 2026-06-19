@@ -1,15 +1,19 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using OpenTelemetry.Metrics;
 using Serilog;
-using SPQC.Confer.SelfHosted.Server.Configuration;
-using SPQC.Confer.SelfHosted.Server.Middleware;
-using SPQC.Confer.SelfHosted.Server.Repositories;
-using SPQC.Confer.SelfHosted.Server.Services;
-using SPQC.Confer.SelfHosted.Server.Telemetry;
+using ConferRecovery.Server.Configuration;
+using ConferRecovery.Security.Extensions;
+using ConferRecovery.Server.Middleware;
+using ConferRecovery.Server.Repositories;
+using ConferRecovery.Server.Seeding;
+using ConferRecovery.Server.Services;
+using ConferRecovery.Server.Telemetry;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -18,6 +22,9 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    builder.WebHost.ConfigureKestrel(options =>
+        options.Limits.MaxRequestBodySize = 64 * 1024);
 
     builder.Host.UseSerilog((ctx, lc) => lc
         .ReadFrom.Configuration(ctx.Configuration)
@@ -32,6 +39,9 @@ try
         ?? throw new InvalidOperationException("MongoDb configuration is required.");
     var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
         ?? throw new InvalidOperationException("Jwt configuration is required.");
+    if (Encoding.UTF8.GetByteCount(jwtSettings.SecretKey) < 32)
+        throw new InvalidOperationException(
+            "Jwt:SecretKey must be at least 32 bytes (256 bits) for HMAC-SHA256.");
     var liveKitSettings = builder.Configuration.GetSection("LiveKit").Get<LiveKitSettings>()
         ?? new LiveKitSettings();
 
@@ -41,7 +51,17 @@ try
 
     // ── MongoDB ───────────────────────────────────────────────────────────────
     builder.Services.AddSingleton<IMongoClient>(_ =>
-        new MongoClient(mongoSettings.ConnectionString));
+    {
+        if (mongoSettings.HasCredentials)
+        {
+            var credential = MongoCredential.CreateCredential(
+                "admin", mongoSettings.Username, mongoSettings.Password);
+            var clientSettings = MongoClientSettings.FromConnectionString(mongoSettings.ConnectionString);
+            clientSettings.Credential = credential;
+            return new MongoClient(clientSettings);
+        }
+        return new MongoClient(mongoSettings.ConnectionString);
+    });
     builder.Services.AddSingleton<IMongoDatabase>(sp =>
         sp.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DatabaseName));
 
@@ -72,8 +92,18 @@ try
     builder.Services.AddSingleton<IAuditService, AuditService>();
     builder.Services.AddSingleton<IApiTokenService, ApiTokenService>();
 
+    // ── Security ──────────────────────────────────────────────────────────────
+    builder.Services.AddConferSecurity();
+
+    // ── Database Seeder ───────────────────────────────────────────────────────
+    var seedSettings = builder.Configuration.GetSection("Seed").Get<SeedSettings>() ?? new SeedSettings();
+    builder.Services.AddSingleton(seedSettings);
+    builder.Services.AddSingleton<DatabaseSeeder>();
+
     // ── Data Protection (encrypts LiveKit secrets at rest in MongoDB) ─────────
-    builder.Services.AddDataProtection();
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+        .SetApplicationName("ConferRecovery");
 
     // ── Authentication ────────────────────────────────────────────────────────
     builder.Services
@@ -104,7 +134,9 @@ try
             var origins = builder.Configuration
                 .GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
             if (origins.Length > 0)
-                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+                policy.WithOrigins(origins)
+                    .WithHeaders("Authorization", "Content-Type")
+                    .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE");
         });
     });
 
@@ -124,6 +156,7 @@ try
     });
 
     app.UseHttpsRedirection();
+    app.UseConferSecurity();
     app.UseCors();
     app.UseAuthentication();
     app.UseAuthorization();
@@ -137,7 +170,9 @@ try
         Predicate = check => check.Tags.Contains("ready")
     }).AllowAnonymous();
 
-    Log.Information("SPQC Confer Server starting on {Env}", app.Environment.EnvironmentName);
+    await app.Services.GetRequiredService<DatabaseSeeder>().SeedAsync();
+
+    Log.Information("ConferRecovery Server starting on {Env}", app.Environment.EnvironmentName);
     app.Run();
 }
 catch (Exception ex)

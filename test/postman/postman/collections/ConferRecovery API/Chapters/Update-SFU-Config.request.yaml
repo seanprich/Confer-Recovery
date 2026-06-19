@@ -1,0 +1,20 @@
+$kind: http-request
+name: Update SFU Config
+method: PUT
+url: '{{baseUrl}}/api/chapters/{{chapterId}}/sfu'
+order: 4000
+description: Update the SFU/LiveKit configuration for a chapter. Returns 204.
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "name": "Downtown Chapter",
+      "sfuUrl": "wss://chapter-a-updated.example.duckdns.org",
+      "liveKitApiKey": "APItest12345",
+      "liveKitApiSecret": "updated-super-secret-livekit-key-for-testing"
+    }

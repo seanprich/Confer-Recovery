@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms/{{roomId}}/end"
+method: POST
+headers:
+  Authorization: Bearer {{hostToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Status is Ended', () => pm.expect(body.status).to.equal('Ended'));
+      pm.test('endedAt is set', () => pm.expect(body.endedAt).to.not.be.null);
+order: 8000

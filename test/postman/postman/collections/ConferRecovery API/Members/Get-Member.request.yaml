@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Member
+method: GET
+url: '{{baseUrl}}/api/members/{{memberId}}'
+order: 2000
+description: Get a member by ID. Members can only see their own record unless they are admins.
+headers:
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'

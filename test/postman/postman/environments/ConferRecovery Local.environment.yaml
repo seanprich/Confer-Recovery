@@ -1,0 +1,77 @@
+name: ConferRecovery Local
+variables:
+  # ── Server ────────────────────────────────────────────────────────────────
+  - key: baseUrl
+    value: 'http://localhost:7282'
+    type: default
+    enabled: true
+
+  # ── OrgAdmin credentials (seed values — fill in before running) ───────────
+  - key: orgAdminEmail
+    value: 'heybuddy'
+    type: default
+    enabled: true
+
+  - key: orgAdminPassword
+    value: 'heybuddy'
+    type: secret
+    enabled: true
+
+  # ── Host member credentials ───────────────────────────────────────────────
+  - key: hostEmail
+    value: 'host@example.com'
+    type: default
+    enabled: true
+
+  - key: hostPassword
+    value: ''
+    type: secret
+    enabled: true
+
+  # ── Listener member credentials ───────────────────────────────────────────
+  - key: memberEmail
+    value: 'listener@example.com'
+    type: default
+    enabled: true
+
+  - key: memberPassword
+    value: ''
+    type: secret
+    enabled: true
+
+  # ── Tokens (populated automatically by Login scripts) ─────────────────────
+  - key: orgAdminToken
+    value: ''
+    type: secret
+    enabled: true
+
+  - key: hostToken
+    value: ''
+    type: secret
+    enabled: true
+
+  - key: memberToken
+    value: ''
+    type: secret
+    enabled: true
+
+  # ── IDs (populated automatically by Create scripts) ───────────────────────
+  - key: chapterId
+    value: ''
+    type: default
+    enabled: true
+
+  - key: memberId
+    value: ''
+    type: default
+    enabled: true
+
+  - key: hostMemberId
+    value: ''
+    type: default
+    enabled: true
+
+  - key: roomId
+    value: ''
+    type: default
+    enabled: true

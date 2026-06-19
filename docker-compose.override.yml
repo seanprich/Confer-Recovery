@@ -4,11 +4,29 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoDb__DatabaseName=confer_dev
+      - MongoDb__Username=${MONGO_USERNAME}
+      - MongoDb__Password=${MONGO_PASSWORD}
       - Jwt__SecretKey=dev-only-secret-key-min-32-characters-long
       - Jwt__ExpiryMinutes=480
     ports:
       - "8080:8080"
 
   mongo:
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
       - "27017:27017"
+
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    command: --config /etc/livekit/livekit.yaml
+    volumes:
+      - ./infra/livekit/livekit.yaml:/etc/livekit/livekit.yaml:ro
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    networks:
+      - confer-net

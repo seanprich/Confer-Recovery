@@ -1,13 +1,13 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using SPQC.Confer.SelfHosted.Server.Configuration;
-using SPQC.Confer.SelfHosted.Server.Models;
-using SPQC.Confer.SelfHosted.Server.Services;
-using SPQC.Confer.SelfHosted.Server.Telemetry;
+using ConferRecovery.Server.Configuration;
+using ConferRecovery.Server.Models;
+using ConferRecovery.Server.Services;
+using ConferRecovery.Server.Telemetry;
 
-namespace SPQC.Confer.SelfHosted.Tests.Services;
+namespace ConferRecovery.Tests.Services;
 
 public sealed class LiveKitTokenServiceTests
 {

@@ -1,0 +1,3 @@
+$kind: collection
+description: "Room lifecycle: create → start → join → end. Captures `roomId`, `liveKitToken`, and `sfuUrl`."
+order: 6000

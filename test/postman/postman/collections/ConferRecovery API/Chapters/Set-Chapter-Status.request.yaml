@@ -1,0 +1,14 @@
+$kind: http-request
+name: Set Chapter Status
+method: PUT
+url: '{{baseUrl}}/api/chapters/{{chapterId}}/status'
+order: 5000
+description: 'Set chapter status. Valid values are Active or Inactive. Returns 204.'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: '"Active"'

@@ -1,6 +1,6 @@
-using SPQC.Confer.SelfHosted.Server.Models;
+﻿using ConferRecovery.Server.Models;
 
-namespace SPQC.Confer.SelfHosted.Server.Services;
+namespace ConferRecovery.Server.Services;
 
 public sealed record LiveKitGrants(
     bool RoomJoin,
