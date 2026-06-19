@@ -9,11 +9,11 @@
 # the real LiveKit credentials (the seeder leaves them blank).
 
 $js = @'
-use confer_dev
+var db = db.getSiblingDB("confer_dev");
 
 // MemberRole.OrgAdmin = 4 (C# enum stored as int)
 if (db.members.countDocuments({ role: 4 }) > 0) {
-    print("OrgAdmin already exists — skipping seed.");
+    print("OrgAdmin already exists - skipping seed.");
     quit(0);
 }
 
@@ -46,7 +46,33 @@ db.chapters.updateOne(
     { $set: { adminMemberIds: [member.insertedId] } }
 );
 
-print("Seeded — chapter: " + chapter.insertedId + ", admin: " + member.insertedId);
+print("Seeded - chapter: " + chapter.insertedId + ", admin: " + member.insertedId);
 '@
 
-docker compose exec mongo mongosh --quiet --eval $js
+# Shell runner — reads credentials from the container's own env vars so the
+# Unicode password is never passed through Windows/PowerShell argument handling.
+$runner = @'
+#!/bin/sh
+mongosh --quiet \
+  -u "$MONGO_INITDB_ROOT_USERNAME" \
+  -p "$MONGO_INITDB_ROOT_PASSWORD" \
+  --authenticationDatabase admin \
+  /tmp/seed.js
+'@
+
+# Write both files with LF line endings (required by sh) and copy into the container.
+function Write-Lf($content, $path) {
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($content.Replace("`r`n", "`n"))
+    [System.IO.File]::WriteAllBytes($path, $bytes)
+}
+
+$tmpJs = [System.IO.Path]::GetTempFileName()
+$tmpSh = [System.IO.Path]::GetTempFileName()
+Write-Lf $js $tmpJs
+Write-Lf $runner $tmpSh
+
+docker cp $tmpJs confer-recovery-mongo-1:/tmp/seed.js
+docker cp $tmpSh confer-recovery-mongo-1:/tmp/run-seed.sh
+Remove-Item $tmpJs, $tmpSh
+
+docker compose exec mongo sh /tmp/run-seed.sh

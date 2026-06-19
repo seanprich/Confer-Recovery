@@ -15,7 +15,8 @@ public class MongoRepository<T> : IRepository<T>
 
     public async Task<T?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+        if (!ObjectId.TryParse(id, out var objectId)) return default;
+        var filter = Builders<T>.Filter.Eq("_id", objectId);
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
 
@@ -41,14 +42,16 @@ public class MongoRepository<T> : IRepository<T>
 
     public async Task<bool> ReplaceAsync(string id, T entity, CancellationToken ct = default)
     {
-        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+        if (!ObjectId.TryParse(id, out var objectId)) return false;
+        var filter = Builders<T>.Filter.Eq("_id", objectId);
         var result = await Collection.ReplaceOneAsync(filter, entity, cancellationToken: ct);
         return result.ModifiedCount > 0;
     }
 
     public async Task<bool> DeleteAsync(string id, CancellationToken ct = default)
     {
-        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+        if (!ObjectId.TryParse(id, out var objectId)) return false;
+        var filter = Builders<T>.Filter.Eq("_id", objectId);
         var result = await Collection.DeleteOneAsync(filter, ct);
         return result.DeletedCount > 0;
     }

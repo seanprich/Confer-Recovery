@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ConferRecovery.Server.DTOs.Auth;
+using ConferRecovery.Server.DTOs.Members;
 using ConferRecovery.Server.Services;
 
 namespace ConferRecovery.Server.Controllers;
@@ -44,7 +45,7 @@ public sealed class AuthController : ControllerBase
     [HttpPost("consent")]
     [Authorize]
     public async Task<IActionResult> AcknowledgeConsent(
-        [FromBody] string consentVersion, CancellationToken ct)
+        [FromBody] AcknowledgeConsentRequest request, CancellationToken ct)
     {
         var memberId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
             ?? User.FindFirst("sub")?.Value;
@@ -53,12 +54,12 @@ public sealed class AuthController : ControllerBase
         var member = await _members.GetByIdAsync(memberId, ct);
         if (member is null) return NotFound();
 
-        await _members.RecordConsentAsync(memberId, consentVersion, ct);
+        await _members.RecordConsentAsync(memberId, request.ConsentVersion, ct);
 
         // No room context at consent time — use a sentinel room ID for the audit entry
         await _audit.RecordAsync("none", memberId, member.DisplayName,
             Models.AuditEventType.ConsentAcknowledged,
-            new Dictionary<string, string> { ["version"] = consentVersion }, ct);
+            new Dictionary<string, string> { ["version"] = request.ConsentVersion }, ct);
 
         return NoContent();
     }

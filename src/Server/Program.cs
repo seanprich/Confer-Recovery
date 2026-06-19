@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using OpenTelemetry.Metrics;
@@ -21,6 +23,9 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    builder.WebHost.ConfigureKestrel(options =>
+        options.Limits.MaxRequestBodySize = 64 * 1024);
+
     builder.Host.UseSerilog((ctx, lc) => lc
         .ReadFrom.Configuration(ctx.Configuration)
         .Enrich.FromLogContext()
@@ -34,6 +39,9 @@ try
         ?? throw new InvalidOperationException("MongoDb configuration is required.");
     var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
         ?? throw new InvalidOperationException("Jwt configuration is required.");
+    if (Encoding.UTF8.GetByteCount(jwtSettings.SecretKey) < 32)
+        throw new InvalidOperationException(
+            "Jwt:SecretKey must be at least 32 bytes (256 bits) for HMAC-SHA256.");
     var liveKitSettings = builder.Configuration.GetSection("LiveKit").Get<LiveKitSettings>()
         ?? new LiveKitSettings();
 
@@ -43,7 +51,17 @@ try
 
     // ── MongoDB ───────────────────────────────────────────────────────────────
     builder.Services.AddSingleton<IMongoClient>(_ =>
-        new MongoClient(mongoSettings.ConnectionString));
+    {
+        if (mongoSettings.HasCredentials)
+        {
+            var credential = MongoCredential.CreateCredential(
+                "admin", mongoSettings.Username, mongoSettings.Password);
+            var clientSettings = MongoClientSettings.FromConnectionString(mongoSettings.ConnectionString);
+            clientSettings.Credential = credential;
+            return new MongoClient(clientSettings);
+        }
+        return new MongoClient(mongoSettings.ConnectionString);
+    });
     builder.Services.AddSingleton<IMongoDatabase>(sp =>
         sp.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DatabaseName));
 
@@ -83,7 +101,9 @@ try
     builder.Services.AddSingleton<DatabaseSeeder>();
 
     // ── Data Protection (encrypts LiveKit secrets at rest in MongoDB) ─────────
-    builder.Services.AddDataProtection();
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+        .SetApplicationName("ConferRecovery");
 
     // ── Authentication ────────────────────────────────────────────────────────
     builder.Services
