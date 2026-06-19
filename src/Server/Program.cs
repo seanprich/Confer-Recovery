@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using OpenTelemetry.Metrics;
 using Serilog;
 using ConferRecovery.Server.Configuration;
+using ConferRecovery.Security.Extensions;
 using ConferRecovery.Server.Middleware;
 using ConferRecovery.Server.Repositories;
 using ConferRecovery.Server.Seeding;
@@ -73,6 +74,9 @@ try
     builder.Services.AddSingleton<IAuditService, AuditService>();
     builder.Services.AddSingleton<IApiTokenService, ApiTokenService>();
 
+    // ── Security ──────────────────────────────────────────────────────────────
+    builder.Services.AddConferSecurity();
+
     // ── Database Seeder ───────────────────────────────────────────────────────
     var seedSettings = builder.Configuration.GetSection("Seed").Get<SeedSettings>() ?? new SeedSettings();
     builder.Services.AddSingleton(seedSettings);
@@ -130,6 +134,7 @@ try
     });
 
     app.UseHttpsRedirection();
+    app.UseConferSecurity();
     app.UseCors();
     app.UseAuthentication();
     app.UseAuthorization();

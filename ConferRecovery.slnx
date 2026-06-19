@@ -1,5 +1,8 @@
 ﻿<Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/Security/">
+    <Project Path="src/Security/ConferRecovery.Security.csproj" />
+  </Folder>
   <Folder Name="/src/Server/">
     <Project Path="src/Server/ConferRecovery.Server.csproj" />
   </Folder>
