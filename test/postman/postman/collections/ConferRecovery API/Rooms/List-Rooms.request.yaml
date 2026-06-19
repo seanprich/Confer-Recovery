@@ -1,0 +1,9 @@
+$kind: http-request
+name: List Rooms
+method: GET
+url: '{{baseUrl}}/api/rooms?chapterId={{chapterId}}'
+order: 1000
+description: List all rooms for a chapter.
+headers:
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'

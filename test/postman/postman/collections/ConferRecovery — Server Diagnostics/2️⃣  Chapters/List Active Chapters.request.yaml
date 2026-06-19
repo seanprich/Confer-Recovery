@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/chapters"
+method: GET
+headers:
+  Authorization: Bearer {{orgAdminToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Returns array', () => pm.expect(body).to.be.an('array'));
+      pm.test('Created chapter is listed', () => {
+        const chapId = pm.collectionVariables.get('chapterId');
+        pm.expect(body.some(c => c.id === chapId)).to.be.true;
+      });
+      pm.test('Secrets not in list response', () => {
+        pm.expect(JSON.stringify(body)).to.not.include('Secret');
+        pm.expect(JSON.stringify(body)).to.not.include('secret');
+      });
+order: 2000

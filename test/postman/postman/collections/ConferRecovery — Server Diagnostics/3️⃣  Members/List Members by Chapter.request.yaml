@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members?chapterId={{chapterId}}"
+method: GET
+headers:
+  Authorization: Bearer {{orgAdminToken}}
+queryParams:
+  chapterId: "{{chapterId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Returns array', () => pm.expect(body).to.be.an('array'));
+      pm.test('At least 2 members', () => pm.expect(body.length).to.be.at.least(2));
+      pm.test('No password hashes leaked', () => {
+        pm.expect(JSON.stringify(body)).to.not.match(/passwordHash|PasswordHash/);
+      });
+      const listener = body.find(m => m.id === pm.collectionVariables.get('memberId'));
+      pm.test('Listener status is Active', () => pm.expect(listener.status).to.equal('Active'));
+order: 6000

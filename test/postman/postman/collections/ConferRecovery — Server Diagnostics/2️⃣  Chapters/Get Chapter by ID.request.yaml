@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/chapters/{{chapterId}}"
+method: GET
+headers:
+  Authorization: Bearer {{orgAdminToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('ID matches', () => pm.expect(body.id).to.equal(pm.collectionVariables.get('chapterId')));
+      pm.test('Has sfuUrl', () => pm.expect(body).to.have.property('sfuUrl'));
+      pm.test('Has liveKitApiKey', () => pm.expect(body).to.have.property('liveKitApiKey'));
+order: 3000

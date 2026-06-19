@@ -1,0 +1,3 @@
+$kind: collection
+name: Auth
+description: 'Authentication endpoints. Login is public; consent requires a valid JWT.'

@@ -1,0 +1,29 @@
+$kind: http-request
+name: Create Member
+method: POST
+url: '{{baseUrl}}/api/members'
+order: 3000
+description: 'Create a new member. Role defaults to Listener. Valid roles: Listener, Host, ChapterAdmin, OrgAdmin. Returns 201.'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "displayName": "Jane Listener",
+      "email": "{{memberEmail}}",
+      "password": "{{memberPassword}}",
+      "chapterId": "{{chapterId}}",
+      "role": "Listener"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("memberId", json.id);
+      }

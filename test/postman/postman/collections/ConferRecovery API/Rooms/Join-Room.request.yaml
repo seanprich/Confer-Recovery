@@ -1,0 +1,22 @@
+$kind: http-request
+name: Join Room
+method: POST
+url: '{{baseUrl}}/api/rooms/{{roomId}}/join'
+order: 5000
+description: 'Join a room. Issues a short-lived LiveKit token. Member must have acknowledged consent. Returns LiveKitToken, SfuUrl, RoomName, TokenExpiresAt.'
+headers:
+  - key: Authorization
+    value: 'Bearer {{memberToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (json) {
+          if (json.liveKitToken) {
+              pm.collectionVariables.set("liveKitToken", json.liveKitToken);
+          }
+          if (json.sfuUrl) {
+              pm.collectionVariables.set("sfuUrl", json.sfuUrl);
+          }
+      }

@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/api/chapters"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: |-
+    {
+      "name": "Downtown Chapter",
+      "sfuUrl": "wss://chapter-a.example.duckdns.org",
+      "liveKitApiKey": "APItest12345",
+      "liveKitApiSecret": "super-secret-livekit-key-for-testing"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      const body = pm.response.json();
+      pm.test('Has id', () => pm.expect(body).to.have.property('id'));
+      pm.test('Name matches', () => pm.expect(body.name).to.equal('Downtown Chapter'));
+      pm.test('Status is Active', () => pm.expect(body.status).to.equal('Active'));
+      pm.test('Secret NOT in response', () => pm.expect(JSON.stringify(body)).to.not.include('secret'));
+      pm.collectionVariables.set('chapterId', body.id);
+      console.log('chapterId captured:', body.id);
+order: 1000

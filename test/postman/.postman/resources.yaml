@@ -1,0 +1,13 @@
+# Use this workspace to collaborate
+workspace:
+  id: fb819ada-dd89-455a-bb7b-16071b337387
+
+localResources:
+  collections:
+    - ..\collections\ConferRecovery.postman_collection.json
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ..\postman\collections\ConferRecovery — Server Diagnostics: a1b2c3d4-e5f6-7890-abcd-ef1234567890

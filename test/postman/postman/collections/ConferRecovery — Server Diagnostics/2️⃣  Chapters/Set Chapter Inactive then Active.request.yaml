@@ -1,0 +1,14 @@
+$kind: http-request
+description: Sets chapter inactive. Run again manually with body `"Active"` to re-activate before the room tests.
+url: "{{baseUrl}}/api/chapters/{{chapterId}}/status"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: '"Inactive"'
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 204', () => pm.response.to.have.status(204));
+order: 6000

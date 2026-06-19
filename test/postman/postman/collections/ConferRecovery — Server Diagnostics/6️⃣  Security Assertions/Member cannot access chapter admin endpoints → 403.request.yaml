@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{baseUrl}}/api/chapters"
+method: GET
+headers:
+  Authorization: Bearer {{memberToken}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 403 (OrgAdmin only)', () => pm.response.to.have.status(403));
+order: 4000

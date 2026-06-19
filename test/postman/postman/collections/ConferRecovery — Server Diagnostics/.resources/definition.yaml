@@ -1,0 +1,52 @@
+$kind: collection
+description: |-
+  End-to-end diagnostic suite for the ConferRecovery self-hosted server.
+
+  ## Before you run
+
+  **Bootstrap requirement:** the server has no public signup endpoint — every account is admin-provisioned. You must create the first OrgAdmin directly in MongoDB before running this collection:
+
+  ```js
+  db.members.insertOne({
+    displayName: 'Org Admin',
+    email: 'admin@conferrecovery.org',
+    passwordHash: '<bcrypt hash of your password>',
+    chapterId: ObjectId().toString(),   // placeholder; update after chapter is created
+    role: 'OrgAdmin',
+    status: 'Active',
+    createdAt: new Date()
+  })
+  ```
+
+  Or use mongosh with the companion seed script (not yet in repo).
+
+  ## Running order
+
+  Folders are numbered and designed to run top-to-bottom. Variables are captured automatically by the test scripts — run the whole collection with the Collection Runner, or execute folders in sequence manually.
+
+  ## Collection variables
+
+  Edit these in the Variables tab before running:
+  - `baseUrl` — server address (default: `http://localhost:8080`)
+  - `orgAdminEmail` / `orgAdminPassword` — credentials for the seeded OrgAdmin
+  - `hostEmail` / `hostPassword` — desired credentials for the host member created during setup
+  - `memberEmail` / `memberPassword` — desired credentials for the listener member
+
+  All other variables (`orgAdminToken`, `chapterId`, `roomId`, etc.) are captured automatically.
+variables:
+  baseUrl: http://localhost:8080
+  orgAdminEmail: admin@conferrecovery.org
+  orgAdminPassword: changeme123!
+  hostEmail: host@conferrecovery.org
+  hostPassword: hostpassword12!
+  memberEmail: member@conferrecovery.org
+  memberPassword: memberpassword12!
+  orgAdminToken: ""
+  hostToken: ""
+  memberToken: ""
+  chapterId: ""
+  memberId: ""
+  hostMemberId: ""
+  roomId: ""
+  liveKitToken: ""
+  sfuUrl: ""

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/consent"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{memberToken}}
+body:
+  type: text
+  content: '"v1.0"'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 204', () => pm.response.to.have.status(204));
+      pm.test('Empty body', () => pm.expect(pm.response.text()).to.equal(''));
+order: 4000

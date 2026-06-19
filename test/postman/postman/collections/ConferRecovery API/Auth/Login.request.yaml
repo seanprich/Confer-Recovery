@@ -1,0 +1,24 @@
+$kind: http-request
+name: Login
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+order: 1000
+description: Authenticate and receive a JWT access token. No auth required.
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{orgAdminEmail}}",
+      "password": "{{orgAdminPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (json && json.accessToken) {
+          pm.collectionVariables.set("orgAdminToken", json.accessToken);
+      }

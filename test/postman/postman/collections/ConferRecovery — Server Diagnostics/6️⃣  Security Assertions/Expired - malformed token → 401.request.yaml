@@ -1,0 +1,10 @@
+$kind: http-request
+name: Expired / malformed token → 401
+url: "{{baseUrl}}/api/members/{{memberId}}"
+method: GET
+headers:
+  Authorization: Bearer not.a.valid.jwt.token
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 401 (bad token)', () => pm.response.to.have.status(401));
+order: 5000

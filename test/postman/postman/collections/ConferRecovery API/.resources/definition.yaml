@@ -1,0 +1,38 @@
+$kind: collection
+name: ConferRecovery API
+description: |-
+  REST API for the ConferRecovery self-hosted server. Covers Auth, Chapters, Members, and Rooms.
+  Base URL: {{baseUrl}} (default: http://localhost:8080). All protected endpoints require Authorization: Bearer {{token}}.
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8080'
+  - key: orgAdminEmail
+    value: 'admin@conferrecovery.org'
+  - key: orgAdminPassword
+    value: 'changeme123!'
+  - key: hostEmail
+    value: 'host@conferrecovery.org'
+  - key: hostPassword
+    value: 'hostpassword12!'
+  - key: memberEmail
+    value: 'member@conferrecovery.org'
+  - key: memberPassword
+    value: 'memberpassword12!'
+  - key: orgAdminToken
+    value: ''
+  - key: hostToken
+    value: ''
+  - key: memberToken
+    value: ''
+  - key: chapterId
+    value: ''
+  - key: memberId
+    value: ''
+  - key: hostMemberId
+    value: ''
+  - key: roomId
+    value: ''
+  - key: liveKitToken
+    value: ''
+  - key: sfuUrl
+    value: ''

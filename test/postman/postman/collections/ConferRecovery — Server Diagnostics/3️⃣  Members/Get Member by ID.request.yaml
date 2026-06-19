@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members/{{memberId}}"
+method: GET
+headers:
+  Authorization: Bearer {{orgAdminToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('ID matches', () => pm.expect(body.id).to.equal(pm.collectionVariables.get('memberId')));
+      pm.test('Has displayName', () => pm.expect(body).to.have.property('displayName'));
+      pm.test('Has email', () => pm.expect(body).to.have.property('email'));
+      pm.test('Has role', () => pm.expect(body).to.have.property('role'));
+      pm.test('Has consentAcknowledged', () => pm.expect(body).to.have.property('consentAcknowledged'));
+      pm.test('Consent not yet acknowledged', () => pm.expect(body.consentAcknowledged).to.be.false);
+order: 7000

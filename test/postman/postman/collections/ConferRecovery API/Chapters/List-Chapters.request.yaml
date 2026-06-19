@@ -1,0 +1,9 @@
+$kind: http-request
+name: List Chapters
+method: GET
+url: '{{baseUrl}}/api/chapters'
+order: 1000
+description: Returns all active chapters.
+headers:
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'

@@ -1,0 +1,10 @@
+$kind: http-request
+description: RoomService.StartAsync returns null if not in Scheduled state. Controller maps this to 404.
+url: "{{baseUrl}}/api/rooms/{{roomId}}/start"
+method: POST
+headers:
+  Authorization: Bearer {{hostToken}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 404 (already active)', () => pm.response.to.have.status(404));
+order: 5000

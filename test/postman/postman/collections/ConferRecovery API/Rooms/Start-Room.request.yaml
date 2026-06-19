@@ -1,0 +1,9 @@
+$kind: http-request
+name: Start Room
+method: POST
+url: '{{baseUrl}}/api/rooms/{{roomId}}/start'
+order: 4000
+description: 'Start a room (transitions status to Live). Requires Host, ChapterAdmin, or OrgAdmin. Returns 200 with updated room.'
+headers:
+  - key: Authorization
+    value: 'Bearer {{hostToken}}'

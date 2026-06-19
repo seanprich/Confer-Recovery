@@ -1,0 +1,3 @@
+$kind: collection
+description: Member login and consent acknowledgement. Captures `hostToken` and `memberToken`.
+order: 5000

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/chapters/{{chapterId}}/status"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: '"Active"'
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 204', () => pm.response.to.have.status(204));
+order: 7000

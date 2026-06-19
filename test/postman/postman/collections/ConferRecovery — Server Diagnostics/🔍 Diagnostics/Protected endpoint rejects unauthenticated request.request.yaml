@@ -1,0 +1,10 @@
+$kind: http-request
+description: Confirms JWT middleware is active — no token should yield 401, not 200 or 500.
+url: "{{baseUrl}}/api/members?chapterId=000000000000000000000000"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 401', () => pm.response.to.have.status(401));
+      pm.test('Response time < 1 s', () => pm.expect(pm.response.responseTime).to.be.below(1000));
+order: 3000

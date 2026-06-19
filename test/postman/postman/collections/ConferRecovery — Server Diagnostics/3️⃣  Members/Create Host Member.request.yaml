@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: |-
+    {
+      "displayName": "Bob Host",
+      "email": "{{hostEmail}}",
+      "password": "{{hostPassword}}",
+      "chapterId": "{{chapterId}}",
+      "role": "Host"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      const body = pm.response.json();
+      pm.test('Role is Host', () => pm.expect(body.role).to.equal('Host'));
+      pm.collectionVariables.set('hostMemberId', body.id);
+      console.log('hostMemberId captured:', body.id);
+order: 2000

@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/chapters/{{chapterId}}/sfu"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: |-
+    {
+      "name": "Downtown Chapter",
+      "sfuUrl": "wss://chapter-a-updated.example.duckdns.org",
+      "liveKitApiKey": "APItest12345",
+      "liveKitApiSecret": "updated-super-secret-livekit-key-for-testing"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 204', () => pm.response.to.have.status(204));
+order: 5000

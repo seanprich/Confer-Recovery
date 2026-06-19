@@ -1,0 +1,3 @@
+$kind: collection
+name: Members
+description: 'Member provisioning and management. List/Create/UpdateStatus require ChapterAdmin or OrgAdmin. UpdateRole requires OrgAdmin. GetById is self-service for regular members.'

@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{memberToken}}
+body:
+  type: text
+  content: |-
+    {
+      "name": "Unauthorized Room",
+      "chapterId": "{{chapterId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 403 (Listener cannot create room)', () => pm.response.to.have.status(403));
+order: 1000

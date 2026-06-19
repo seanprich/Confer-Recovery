@@ -1,0 +1,17 @@
+$kind: http-request
+description: Validates DataAnnotations are enforced before hitting the service layer.
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "not-an-email",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 400', () => pm.response.to.have.status(400));
+order: 3000

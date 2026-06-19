@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Room
+method: GET
+url: '{{baseUrl}}/api/rooms/{{roomId}}'
+order: 2000
+description: Get a room by ID.
+headers:
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'

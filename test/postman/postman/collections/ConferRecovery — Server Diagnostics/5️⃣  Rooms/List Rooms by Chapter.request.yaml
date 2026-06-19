@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms?chapterId={{chapterId}}"
+method: GET
+headers:
+  Authorization: Bearer {{hostToken}}
+queryParams:
+  chapterId: "{{chapterId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Returns array', () => pm.expect(body).to.be.an('array'));
+      const room = body.find(r => r.id === pm.collectionVariables.get('roomId'));
+      pm.test('Created room is listed', () => pm.expect(room).to.exist);
+order: 2000

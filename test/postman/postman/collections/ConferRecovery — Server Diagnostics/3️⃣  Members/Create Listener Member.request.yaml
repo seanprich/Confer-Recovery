@@ -1,0 +1,29 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: |-
+    {
+      "displayName": "Jane Listener",
+      "email": "{{memberEmail}}",
+      "password": "{{memberPassword}}",
+      "chapterId": "{{chapterId}}",
+      "role": "Listener"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      const body = pm.response.json();
+      pm.test('Has id', () => pm.expect(body).to.have.property('id'));
+      pm.test('Status is Pending', () => pm.expect(body.status).to.equal('Pending'));
+      pm.test('Role is Listener', () => pm.expect(body.role).to.equal('Listener'));
+      pm.test('Password NOT in response', () => pm.expect(JSON.stringify(body)).to.not.include('password'));
+      pm.test('PasswordHash NOT in response', () => pm.expect(JSON.stringify(body)).to.not.include('Hash'));
+      pm.collectionVariables.set('memberId', body.id);
+      console.log('memberId captured:', body.id);
+order: 1000

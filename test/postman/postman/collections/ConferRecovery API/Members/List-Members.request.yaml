@@ -1,0 +1,9 @@
+$kind: http-request
+name: List Members
+method: GET
+url: '{{baseUrl}}/api/members?chapterId={{chapterId}}'
+order: 1000
+description: List all members in a chapter. Requires ChapterAdmin or OrgAdmin.
+headers:
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'

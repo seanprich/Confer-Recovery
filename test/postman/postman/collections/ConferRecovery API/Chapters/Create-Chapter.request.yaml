@@ -1,0 +1,28 @@
+$kind: http-request
+name: Create Chapter
+method: POST
+url: '{{baseUrl}}/api/chapters'
+order: 3000
+description: Create a new chapter. Returns 201 with the created chapter. Captures chapterId.
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{orgAdminToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "name": "Downtown Chapter",
+      "sfuUrl": "wss://chapter-a.example.duckdns.org",
+      "liveKitApiKey": "APItest12345",
+      "liveKitApiSecret": "super-secret-livekit-key-for-testing"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("chapterId", json.id);
+      }

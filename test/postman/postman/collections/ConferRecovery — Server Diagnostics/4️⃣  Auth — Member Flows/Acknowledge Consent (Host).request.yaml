@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/consent"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{hostToken}}
+body:
+  type: text
+  content: '"v1.0"'
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 204', () => pm.response.to.have.status(204));
+order: 5000

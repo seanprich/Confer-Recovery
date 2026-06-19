@@ -1,0 +1,3 @@
+$kind: collection
+description: Log in as the seeded OrgAdmin. Captures `orgAdminToken` for all subsequent admin calls.
+order: 2000

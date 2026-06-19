@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members/000000000000000000000000"
+method: GET
+headers:
+  Authorization: Bearer {{orgAdminToken}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Status 404', () => pm.response.to.have.status(404));
+order: 8000

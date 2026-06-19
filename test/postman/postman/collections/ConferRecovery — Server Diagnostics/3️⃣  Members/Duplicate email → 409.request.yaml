@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/members"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{orgAdminToken}}
+body:
+  type: text
+  content: |-
+    {
+      "displayName": "Jane Duplicate",
+      "email": "{{memberEmail}}",
+      "password": "{{memberPassword}}",
+      "chapterId": "{{chapterId}}",
+      "role": "Listener"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 409', () => pm.response.to.have.status(409));
+      const body = pm.response.json();
+      pm.test('Has error message', () => pm.expect(body).to.have.property('error'));
+order: 3000

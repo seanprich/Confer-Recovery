@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/rooms"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{hostToken}}
+body:
+  type: text
+  content: |-
+    {
+      "name": "Weekly Tuesday Meeting",
+      "chapterId": "{{chapterId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      const body = pm.response.json();
+      pm.test('Has id', () => pm.expect(body).to.have.property('id'));
+      pm.test('Status is Scheduled', () => pm.expect(body.status).to.equal('Scheduled'));
+      pm.test('LobbyEnabled is true', () => pm.expect(body.lobbyEnabled).to.be.true);
+      pm.test('MaxVideoPublishers is 10', () => pm.expect(body.maxVideoPublishers).to.equal(10));
+      pm.test('MaxParticipants is 110', () => pm.expect(body.maxParticipants).to.equal(110));
+      pm.collectionVariables.set('roomId', body.id);
+      console.log('roomId captured:', body.id);
+order: 1000
