@@ -15,6 +15,13 @@ services:
       - Jwt__SecretKey=${JWT_SECRET_KEY}
       - Jwt__Issuer=spqc-confer
       - Jwt__Audience=spqc-confer-clients
+      - Seed__AdminEmail=${SEED_ADMIN_EMAIL:-}
+      - Seed__AdminPassword=${SEED_ADMIN_PASSWORD:-}
+      - Seed__AdminDisplayName=${SEED_ADMIN_DISPLAY_NAME:-Admin}
+      - Seed__ChapterName=${SEED_CHAPTER_NAME:-Default Chapter}
+      - Seed__SfuUrl=${SEED_SFU_URL:-}
+      - Seed__LiveKitApiKey=${SEED_LIVEKIT_API_KEY:-}
+      - Seed__LiveKitApiSecret=${SEED_LIVEKIT_API_SECRET:-}
     depends_on:
       mongo:
         condition: service_healthy

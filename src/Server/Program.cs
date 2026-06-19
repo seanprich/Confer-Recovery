@@ -8,6 +8,7 @@ using Serilog;
 using ConferRecovery.Server.Configuration;
 using ConferRecovery.Server.Middleware;
 using ConferRecovery.Server.Repositories;
+using ConferRecovery.Server.Seeding;
 using ConferRecovery.Server.Services;
 using ConferRecovery.Server.Telemetry;
 
@@ -71,6 +72,11 @@ try
     builder.Services.AddSingleton<ILiveKitTokenService, LiveKitTokenService>();
     builder.Services.AddSingleton<IAuditService, AuditService>();
     builder.Services.AddSingleton<IApiTokenService, ApiTokenService>();
+
+    // ── Database Seeder ───────────────────────────────────────────────────────
+    var seedSettings = builder.Configuration.GetSection("Seed").Get<SeedSettings>() ?? new SeedSettings();
+    builder.Services.AddSingleton(seedSettings);
+    builder.Services.AddSingleton<DatabaseSeeder>();
 
     // ── Data Protection (encrypts LiveKit secrets at rest in MongoDB) ─────────
     builder.Services.AddDataProtection();
@@ -136,6 +142,8 @@ try
     {
         Predicate = check => check.Tags.Contains("ready")
     }).AllowAnonymous();
+
+    await app.Services.GetRequiredService<DatabaseSeeder>().SeedAsync();
 
     Log.Information("ConferRecovery Server starting on {Env}", app.Environment.EnvironmentName);
     app.Run();
