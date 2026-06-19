@@ -114,7 +114,9 @@ try
             var origins = builder.Configuration
                 .GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
             if (origins.Length > 0)
-                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+                policy.WithOrigins(origins)
+                    .WithHeaders("Authorization", "Content-Type")
+                    .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE");
         });
     });
 
