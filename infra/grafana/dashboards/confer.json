@@ -1,6 +1,6 @@
 ﻿{
   "id": null,
-  "uid": "spqc-confer-telemetry",
+  "uid": "confer-telemetry",
   "title": "ConferRecovery",
   "description": "Self-hosted chapter meeting platform — local telemetry only, no cloud",
   "tags": ["confer", "self-hosted"],
@@ -20,10 +20,10 @@
       "title": "Active Rooms",
       "description": "Rooms currently in Active state",
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "confer_rooms_active",
           "instant": true,
           "legendFormat": "active"
@@ -59,10 +59,10 @@
       "title": "Rooms Created (1 h)",
       "description": "Rooms created in the last hour",
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "increase(confer_rooms_created_total{job=\"confer-server\"}[1h])",
           "instant": true,
           "legendFormat": "created"
@@ -91,10 +91,10 @@
       "title": "Auth Failures (5 m)",
       "description": "Failed authentication attempts in the last 5 minutes",
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "increase(confer_auth_attempts_total{job=\"confer-server\",result=\"failure\"}[5m])",
           "instant": true,
           "legendFormat": "failures"
@@ -131,10 +131,10 @@
       "title": "Tokens Issued (5 m)",
       "description": "LiveKit room tokens issued in the last 5 minutes",
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "increase(confer_tokens_issued_total{job=\"confer-server\"}[5m])",
           "instant": true,
           "legendFormat": "tokens"
@@ -163,15 +163,15 @@
       "title": "HTTP Request Rate",
       "description": "Requests per second across all endpoints",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"confer-server\"}[5m]))",
           "legendFormat": "req/s"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"confer-server\",http_response_status_code=~\"5..\"}[5m]))",
           "legendFormat": "5xx/s"
         }
@@ -200,20 +200,20 @@
       "title": "HTTP Response Latency",
       "description": "P50 / P95 / P99 response time",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{job=\"confer-server\"}[5m])) by (le))",
           "legendFormat": "P50"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job=\"confer-server\"}[5m])) by (le))",
           "legendFormat": "P95"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=\"confer-server\"}[5m])) by (le))",
           "legendFormat": "P99"
         }
@@ -237,10 +237,10 @@
       "title": "LiveKit Token Issuance by Role",
       "description": "Rate of LiveKit room tokens issued, broken out by member role",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "sum(rate(confer_tokens_issued_total{job=\"confer-server\"}[5m])) by (role)",
           "legendFormat": "{{role}}"
         }
@@ -264,10 +264,10 @@
       "title": "Authentication Attempts",
       "description": "Successful vs failed login attempts per second",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "sum(rate(confer_auth_attempts_total{job=\"confer-server\"}[5m])) by (result)",
           "legendFormat": "{{result}}"
         }
@@ -300,15 +300,15 @@
       "title": "Room Session Duration",
       "description": "P50 and P95 duration of completed room sessions (seconds)",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "histogram_quantile(0.50, sum(rate(confer_room_duration_seconds_bucket{job=\"confer-server\"}[30m])) by (le))",
           "legendFormat": "P50"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "histogram_quantile(0.95, sum(rate(confer_room_duration_seconds_bucket{job=\"confer-server\"}[30m])) by (le))",
           "legendFormat": "P95"
         }
@@ -332,10 +332,10 @@
       "title": ".NET GC Heap Size",
       "description": "Managed heap memory used by the server process",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
-      "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+      "datasource": { "type": "prometheus", "uid": "confer-prom" },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "spqc-confer-prom" },
+          "datasource": { "type": "prometheus", "uid": "confer-prom" },
           "expr": "process_runtime_dotnet_gc_heap_size_bytes{job=\"confer-server\"}",
           "legendFormat": "heap (bytes)"
         }

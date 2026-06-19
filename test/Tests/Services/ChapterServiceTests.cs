@@ -13,7 +13,7 @@ public sealed class ChapterServiceTests
 
     // Use real DataProtection so we can verify encrypt/decrypt round-trips
     private readonly IDataProtectionProvider _dpProvider =
-        DataProtectionProvider.Create("spqc-confer-test");
+        DataProtectionProvider.Create("confer-test");
 
     private ChapterService Sut() =>
         new(_repo, _dpProvider, NullLogger<ChapterService>.Instance);
