@@ -30,7 +30,7 @@ public sealed class RoomsController : ControllerBase
         _settings = settings;
     }
 
-    [HttpGet]
+    [HttpGet(Name = "RoomsGetByChapter")]
     public async Task<ActionResult<IReadOnlyList<RoomResponse>>> GetByChapter(
         [FromQuery] string chapterId, CancellationToken ct)
     {
@@ -42,14 +42,14 @@ public sealed class RoomsController : ControllerBase
         return Ok(rooms.Select(ToResponse).ToList());
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "RoomsGetById")]
     public async Task<ActionResult<RoomResponse>> GetById(string id, CancellationToken ct)
     {
         var room = await _rooms.GetByIdAsync(id, ct);
         return room is null ? NotFound() : Ok(ToResponse(room));
     }
 
-    [HttpPost]
+    [HttpPost(Name = "RoomsCreate")]
     [Authorize(Roles = "Host,ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<RoomResponse>> Create(
         [FromBody] CreateRoomRequest request, CancellationToken ct)
@@ -65,7 +65,7 @@ public sealed class RoomsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = room.Id }, ToResponse(room));
     }
 
-    [HttpPost("{id}/start")]
+    [HttpPost("{id}/start", Name = "RoomsStart")]
     [Authorize(Roles = "Host,ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<RoomResponse>> Start(string id, CancellationToken ct)
     {
@@ -78,7 +78,7 @@ public sealed class RoomsController : ControllerBase
         return updated is null ? Conflict(new { error = "Room is not in Scheduled state." }) : Ok(ToResponse(updated));
     }
 
-    [HttpPost("{id}/end")]
+    [HttpPost("{id}/end", Name = "RoomsEnd")]
     [Authorize(Roles = "Host,ChapterAdmin,OrgAdmin")]
     public async Task<ActionResult<RoomResponse>> End(string id, CancellationToken ct)
     {
@@ -95,7 +95,7 @@ public sealed class RoomsController : ControllerBase
     /// Issues a short-lived, room-scoped LiveKit token for the authenticated member.
     /// The caller must have acknowledged consent before receiving a token.
     /// </summary>
-    [HttpPost("{id}/join")]
+    [HttpPost("{id}/join", Name = "RoomsJoin")]
     public async Task<ActionResult<JoinRoomResponse>> Join(string id, CancellationToken ct)
     {
         var memberId = User.MemberId();

@@ -21,7 +21,7 @@ public sealed class AuthController : ControllerBase
         _audit = audit;
     }
 
-    [HttpPost("login")]
+    [HttpPost("login", Name = "AuthLogin")]
     [AllowAnonymous]
     public async Task<ActionResult<LoginResponse>> Login(
         [FromBody] LoginRequest request, CancellationToken ct)
@@ -42,7 +42,7 @@ public sealed class AuthController : ControllerBase
             Role: member.Role.ToString()));
     }
 
-    [HttpPost("consent")]
+    [HttpPost("consent", Name = "AuthAcknowledgeConsent")]
     [Authorize]
     public async Task<IActionResult> AcknowledgeConsent(
         [FromBody] AcknowledgeConsentRequest request, CancellationToken ct)

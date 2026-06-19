@@ -7,7 +7,11 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5132",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Seed__AdminEmail": "admin@example.com",
+        "Seed__AdminPassword": "admin123",
+        "Seed__AdminDisplayName": "Admin",
+        "Seed__ChapterName": "Dev Chapter"
       }
     },
     "https": {
@@ -16,7 +20,11 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7282;http://localhost:5132",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Seed__AdminEmail": "admin@example.com",
+        "Seed__AdminPassword": "admin123",
+        "Seed__AdminDisplayName": "Admin",
+        "Seed__ChapterName": "Dev Chapter"
       }
     }
   }

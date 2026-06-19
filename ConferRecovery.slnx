@@ -1,5 +1,11 @@
-﻿<Solution>
+<Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/Desktop/">
+    <Project Path="src/Desktop/ConferRecovery.Desktop.Application/ConferRecovery.Desktop.Application.csproj" />
+    <Project Path="src/Desktop/ConferRecovery.Desktop.Contracts/ConferRecovery.Desktop.Contracts.csproj" />
+    <Project Path="src/Desktop/ConferRecovery.Desktop.Infrastructure/ConferRecovery.Desktop.Infrastructure.csproj" />
+    <Project Path="src/Desktop/ConferRecovery.Desktop/ConferRecovery.Desktop.csproj" />
+  </Folder>
   <Folder Name="/src/Security/">
     <Project Path="src/Security/ConferRecovery.Security.csproj" />
   </Folder>

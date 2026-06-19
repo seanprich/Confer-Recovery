@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ConferRecovery.Desktop.Application\ConferRecovery.Desktop.Application.csproj" />
+    <ProjectReference Include="..\ConferRecovery.Desktop.Contracts\ConferRecovery.Desktop.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.1.0" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ServerProjectPath>..\..\Server\ConferRecovery.Server.csproj</ServerProjectPath>
+    <ServerOpenApiFile>..\..\Server\obj\$(Configuration)\net10.0\EndpointInfo\ConferRecovery.Server.json</ServerOpenApiFile>
+    <NswagCommand Condition="'$(NSwagExe_Net80)' != ''">$(NSwagExe_Net80)</NswagCommand>
+    <NswagCommand Condition="'$(NswagCommand)' == '' and '$(NSwagExe)' != ''">$(NSwagExe)</NswagCommand>
+  </PropertyGroup>
+
+  <Target Name="GenerateConferOpenApiClient" BeforeTargets="BeforeCompile">
+    <MSBuild Projects="$(ServerProjectPath)" Targets="Build" Properties="Configuration=$(Configuration)" />
+    <MakeDir Directories="Generated" />
+    <Exec Command="$(NswagCommand) run nswag.json /variables:Configuration=$(Configuration),OpenApiFile=$(ServerOpenApiFile)" />
+  </Target>
+
+</Project>

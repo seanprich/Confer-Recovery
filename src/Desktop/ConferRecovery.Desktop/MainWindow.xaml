@@ -1,0 +1,52 @@
+﻿<Window x:Class="ConferRecovery.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ConferRecovery.Desktop"
+        mc:Ignorable="d"
+        Title="Confer Recovery Desktop"
+        Height="360"
+        Width="520"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Desktop Login (Initial Dev)"
+                   FontSize="22"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,16" />
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+            <TextBlock Text="Email" Margin="0,0,0,4" />
+            <TextBox x:Name="EmailTextBox" Height="32" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,14">
+            <TextBlock Text="Password" Margin="0,0,0,4" />
+            <PasswordBox x:Name="PasswordInput" Height="32" />
+        </StackPanel>
+
+        <Button Grid.Row="3"
+                x:Name="LoginButton"
+                Content="Sign In"
+                Height="34"
+                Width="120"
+                HorizontalAlignment="Left"
+                Click="OnLoginClicked" />
+
+        <TextBlock Grid.Row="4"
+                   x:Name="StatusText"
+                   Margin="0,14,0,0"
+                   Foreground="#334155"
+                   TextWrapping="Wrap" />
+    </Grid>
+</Window>
