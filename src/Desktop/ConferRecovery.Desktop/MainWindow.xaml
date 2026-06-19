@@ -3,50 +3,231 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ConferRecovery.Desktop"
         mc:Ignorable="d"
         Title="Confer Recovery Desktop"
-        Height="360"
-        Width="520"
-        ResizeMode="NoResize"
+        Height="760"
+        Width="1100"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <Grid x:Name="LoginPanel">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Text="Desktop Login (Initial Dev)"
-                   FontSize="22"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,16" />
+            <TextBlock Grid.Row="0"
+                       Text="Desktop Login (Initial Dev)"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,16" />
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,12">
-            <TextBlock Text="Email" Margin="0,0,0,4" />
-            <TextBox x:Name="EmailTextBox" Height="32" />
-        </StackPanel>
+            <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                <TextBlock Text="Email" Margin="0,0,0,4" />
+                <TextBox x:Name="EmailTextBox" Height="32" />
+            </StackPanel>
 
-        <StackPanel Grid.Row="2" Margin="0,0,0,14">
-            <TextBlock Text="Password" Margin="0,0,0,4" />
-            <PasswordBox x:Name="PasswordInput" Height="32" />
-        </StackPanel>
+            <StackPanel Grid.Row="2" Margin="0,0,0,14">
+                <TextBlock Text="Password" Margin="0,0,0,4" />
+                <PasswordBox x:Name="PasswordInput" Height="32" />
+            </StackPanel>
 
-        <Button Grid.Row="3"
-                x:Name="LoginButton"
-                Content="Sign In"
-                Height="34"
-                Width="120"
-                HorizontalAlignment="Left"
-                Click="OnLoginClicked" />
+            <Button Grid.Row="3"
+                    x:Name="LoginButton"
+                    Content="Sign In"
+                    Height="34"
+                    Width="120"
+                    HorizontalAlignment="Left"
+                    Click="OnLoginClicked" />
 
-        <TextBlock Grid.Row="4"
-                   x:Name="StatusText"
-                   Margin="0,14,0,0"
-                   Foreground="#334155"
-                   TextWrapping="Wrap" />
+            <TextBlock Grid.Row="4"
+                       x:Name="StatusText"
+                       Margin="0,14,0,0"
+                       Foreground="#334155"
+                       TextWrapping="Wrap" />
+        </Grid>
+
+        <Grid x:Name="SessionPanel" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="Authenticated Session"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,16" />
+
+            <TextBlock Grid.Row="1"
+                       x:Name="WelcomeText"
+                       Margin="0,0,0,10"
+                       FontSize="16"
+                       FontWeight="SemiBold" />
+
+            <TextBlock Grid.Row="2"
+                       x:Name="SessionMetaText"
+                       Margin="0,0,0,8"
+                       TextWrapping="Wrap"
+                       Foreground="#334155" />
+
+            <Grid Grid.Row="3" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           x:Name="TokenText"
+                           Margin="0,0,12,0"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"
+                           Foreground="#334155" />
+
+                <Button Grid.Column="1"
+                        x:Name="ClearOutputButton"
+                        Content="Clear Output"
+                        Height="30"
+                        Width="120"
+                        Margin="0,0,8,0"
+                        Click="OnClearOutputClicked" />
+
+                <Button Grid.Column="2"
+                        x:Name="LogoutButton"
+                        Content="Log Out"
+                        Height="30"
+                        Width="120"
+                        Click="OnLogoutClicked" />
+            </Grid>
+
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <TabControl Grid.Column="0" Margin="0,0,10,0">
+                    <TabItem Header="Chapters">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Chapter Id" />
+                                <TextBox x:Name="ChapterIdTextBox" Margin="0,4,0,8" />
+
+                                <TextBlock Text="Chapter Name" />
+                                <TextBox x:Name="ChapterNameTextBox" Margin="0,4,0,8" Text="Dev Chapter" />
+
+                                <TextBlock Text="SFU Url" />
+                                <TextBox x:Name="ChapterSfuUrlTextBox" Margin="0,4,0,8" Text="ws://localhost:7880" />
+
+                                <TextBlock Text="LiveKit API Key" />
+                                <TextBox x:Name="ChapterApiKeyTextBox" Margin="0,4,0,8" Text="devkey" />
+
+                                <TextBlock Text="LiveKit API Secret" />
+                                <TextBox x:Name="ChapterApiSecretTextBox" Margin="0,4,0,8" Text="devsecret" />
+
+                                <TextBlock Text="Chapter Status (Active/Inactive)" />
+                                <TextBox x:Name="ChapterStatusTextBox" Margin="0,4,0,12" Text="Active" />
+
+                                <WrapPanel>
+                                    <Button Content="Get Active" Width="130" Margin="0,0,8,8" Click="OnChaptersGetActiveClicked" />
+                                    <Button Content="Get By Id" Width="130" Margin="0,0,8,8" Click="OnChaptersGetByIdClicked" />
+                                    <Button Content="Create" Width="130" Margin="0,0,8,8" Click="OnChaptersCreateClicked" />
+                                    <Button Content="Update SFU" Width="130" Margin="0,0,8,8" Click="OnChaptersUpdateSfuClicked" />
+                                    <Button Content="Set Status" Width="130" Margin="0,0,8,8" Click="OnChaptersSetStatusClicked" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="Members">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Chapter Id" />
+                                <TextBox x:Name="MembersChapterIdTextBox" Margin="0,4,0,8" />
+
+                                <TextBlock Text="Member Id" />
+                                <TextBox x:Name="MemberIdTextBox" Margin="0,4,0,8" />
+
+                                <TextBlock Text="Display Name" />
+                                <TextBox x:Name="MemberDisplayNameTextBox" Margin="0,4,0,8" Text="Dev Member" />
+
+                                <TextBlock Text="Email" />
+                                <TextBox x:Name="MemberEmailTextBox" Margin="0,4,0,8" Text="dev.member@example.com" />
+
+                                <TextBlock Text="Password" />
+                                <TextBox x:Name="MemberPasswordTextBox" Margin="0,4,0,8" Text="password123" />
+
+                                <TextBlock Text="Role" />
+                                <TextBox x:Name="MemberRoleTextBox" Margin="0,4,0,8" Text="Listener" />
+
+                                <TextBlock Text="Status" />
+                                <TextBox x:Name="MemberStatusTextBox" Margin="0,4,0,12" Text="Active" />
+
+                                <WrapPanel>
+                                    <Button Content="Get By Chapter" Width="130" Margin="0,0,8,8" Click="OnMembersGetByChapterClicked" />
+                                    <Button Content="Get By Id" Width="130" Margin="0,0,8,8" Click="OnMembersGetByIdClicked" />
+                                    <Button Content="Create" Width="130" Margin="0,0,8,8" Click="OnMembersCreateClicked" />
+                                    <Button Content="Update Status" Width="130" Margin="0,0,8,8" Click="OnMembersUpdateStatusClicked" />
+                                    <Button Content="Update Role" Width="130" Margin="0,0,8,8" Click="OnMembersUpdateRoleClicked" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="Rooms">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Chapter Id" />
+                                <TextBox x:Name="RoomsChapterIdTextBox" Margin="0,4,0,8" />
+
+                                <TextBlock Text="Room Id" />
+                                <TextBox x:Name="RoomIdTextBox" Margin="0,4,0,8" />
+
+                                <TextBlock Text="Room Name" />
+                                <TextBox x:Name="RoomNameTextBox" Margin="0,4,0,8" Text="Dev Room" />
+
+                                <TextBlock Text="ScheduledAt (optional, ISO-8601)" />
+                                <TextBox x:Name="RoomScheduledAtTextBox" Margin="0,4,0,12" />
+
+                                <WrapPanel>
+                                    <Button Content="Get By Chapter" Width="130" Margin="0,0,8,8" Click="OnRoomsGetByChapterClicked" />
+                                    <Button Content="Get By Id" Width="130" Margin="0,0,8,8" Click="OnRoomsGetByIdClicked" />
+                                    <Button Content="Create" Width="130" Margin="0,0,8,8" Click="OnRoomsCreateClicked" />
+                                    <Button Content="Start" Width="130" Margin="0,0,8,8" Click="OnRoomsStartClicked" />
+                                    <Button Content="End" Width="130" Margin="0,0,8,8" Click="OnRoomsEndClicked" />
+                                    <Button Content="Join" Width="130" Margin="0,0,8,8" Click="OnRoomsJoinClicked" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Raw Output" FontWeight="SemiBold" Margin="0,0,0,6" />
+                    <TextBox x:Name="DevOutputTextBox"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             IsReadOnly="True" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Grid.Row="5"
+                       x:Name="SessionStatusText"
+                       Margin="0,10,0,0"
+                       Foreground="#334155"
+                       TextWrapping="Wrap" />
+        </Grid>
     </Grid>
 </Window>
