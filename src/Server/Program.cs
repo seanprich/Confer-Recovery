@@ -128,7 +128,7 @@ try
 
     // ── Data Protection (encrypts LiveKit secrets at rest in MongoDB) ─────────
     builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+        .PersistKeysToFileSystem(new DirectoryInfo(Environment.GetEnvironmentVariable("DP_KEYS_PATH") ?? "/app/keys"))
         .SetApplicationName("ConferRecovery");
 
     // ── Authentication ────────────────────────────────────────────────────────

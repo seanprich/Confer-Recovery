@@ -12,7 +12,7 @@ public sealed class ApiChaptersClientTests
         var generated = Substitute.For<IChaptersClient>();
         var createdAt = new DateTimeOffset(DateTime.UtcNow.AddDays(-2));
 
-        generated.ChaptersAllAsync(Arg.Any<CancellationToken>())
+        generated.ChaptersGetActiveAsync(Arg.Any<CancellationToken>())
             .Returns(new List<ChapterResponse>
             {
                 new()
@@ -39,7 +39,7 @@ public sealed class ApiChaptersClientTests
     public async Task GetByIdAsync_WhenNotFound_ReturnsNull()
     {
         var generated = Substitute.For<IChaptersClient>();
-        generated.ChaptersGETAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        generated.ChaptersGetByIdAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns<Task<ChapterResponse>>(_ => throw new ConferApiException(
                 "Not Found",
                 404,
@@ -60,7 +60,7 @@ public sealed class ApiChaptersClientTests
         var generated = Substitute.For<IChaptersClient>();
         var createdAt = new DateTimeOffset(DateTime.UtcNow.AddDays(-5));
 
-        generated.ChaptersGETAsync("chapter-1", Arg.Any<CancellationToken>())
+        generated.ChaptersGetByIdAsync("chapter-1", Arg.Any<CancellationToken>())
             .Returns(new ChapterResponse
             {
                 Id = "chapter-1",
@@ -86,7 +86,7 @@ public sealed class ApiChaptersClientTests
         var generated = Substitute.For<IChaptersClient>();
         var createdAt = new DateTimeOffset(DateTime.UtcNow.AddDays(-3));
 
-        generated.ChaptersPOSTAsync(Arg.Any<CreateChapterRequest>(), Arg.Any<CancellationToken>())
+        generated.ChaptersCreateAsync(Arg.Any<CreateChapterRequest>(), Arg.Any<CancellationToken>())
             .Returns(new ChapterResponse
             {
                 Id = "chapter-1",
@@ -119,7 +119,7 @@ public sealed class ApiChaptersClientTests
             CancellationToken.None);
 
         Assert.True(success);
-        await generated.Received(1).SfuAsync(
+        await generated.Received(1).ChaptersUpdateSfuAsync(
             "chapter-1",
             Arg.Is<CreateChapterRequest>(x => x.SfuUrl == "wss://sfu" && x.LiveKitApiKey == "k"),
             Arg.Any<CancellationToken>());
@@ -129,7 +129,7 @@ public sealed class ApiChaptersClientTests
     public async Task UpdateSfuAsync_WhenNotFound_ReturnsFalse()
     {
         var generated = Substitute.For<IChaptersClient>();
-        generated.SfuAsync(Arg.Any<string>(), Arg.Any<CreateChapterRequest>(), Arg.Any<CancellationToken>())
+        generated.ChaptersUpdateSfuAsync(Arg.Any<string>(), Arg.Any<CreateChapterRequest>(), Arg.Any<CancellationToken>())
             .Returns<Task>(_ => throw new ConferApiException(
                 "Not Found",
                 404,
@@ -156,14 +156,14 @@ public sealed class ApiChaptersClientTests
         var success = await sut.SetStatusAsync("chapter-1", "Inactive", CancellationToken.None);
 
         Assert.True(success);
-        await generated.Received(1).StatusAsync("chapter-1", "Inactive", Arg.Any<CancellationToken>());
+        await generated.Received(1).ChaptersSetStatusAsync("chapter-1", "Inactive", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task SetStatusAsync_WhenNotFound_ReturnsFalse()
     {
         var generated = Substitute.For<IChaptersClient>();
-        generated.StatusAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        generated.ChaptersSetStatusAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns<Task>(_ => throw new ConferApiException(
                 "Not Found",
                 404,

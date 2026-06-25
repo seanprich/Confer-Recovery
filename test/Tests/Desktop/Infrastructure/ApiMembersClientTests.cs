@@ -12,7 +12,7 @@ public sealed class ApiMembersClientTests
         var generated = Substitute.For<IMembersClient>();
         var createdAt = new DateTimeOffset(DateTime.UtcNow.AddDays(-1));
 
-        generated.MembersAllAsync("chapter-1", Arg.Any<CancellationToken>())
+        generated.MembersGetByChapterAsync("chapter-1", Arg.Any<CancellationToken>())
             .Returns(new List<MemberResponse>
             {
                 new()
@@ -42,7 +42,7 @@ public sealed class ApiMembersClientTests
     public async Task GetByIdAsync_WhenNotFound_ReturnsNull()
     {
         var generated = Substitute.For<IMembersClient>();
-        generated.MembersGETAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        generated.MembersGetByIdAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns<Task<MemberResponse>>(_ => throw new ConferApiException(
                 "Not Found",
                 404,
@@ -64,7 +64,7 @@ public sealed class ApiMembersClientTests
         var createdAt = new DateTimeOffset(DateTime.UtcNow.AddDays(-4));
         var lastLoginAt = new DateTimeOffset(DateTime.UtcNow.AddHours(-2));
 
-        generated.MembersGETAsync("member-1", Arg.Any<CancellationToken>())
+        generated.MembersGetByIdAsync("member-1", Arg.Any<CancellationToken>())
             .Returns(new MemberResponse
             {
                 Id = "member-1",
@@ -99,7 +99,7 @@ public sealed class ApiMembersClientTests
             CancellationToken.None);
 
         Assert.True(success);
-        await generated.Received(1).Status2Async(
+        await generated.Received(1).MembersUpdateStatusAsync(
             "member-1",
             Arg.Is<UpdateMemberStatusRequest>(x => x.Status == "Inactive"),
             Arg.Any<CancellationToken>());
@@ -109,7 +109,7 @@ public sealed class ApiMembersClientTests
     public async Task UpdateStatusAsync_WhenNotFound_ReturnsFalse()
     {
         var generated = Substitute.For<IMembersClient>();
-        generated.Status2Async(Arg.Any<string>(), Arg.Any<UpdateMemberStatusRequest>(), Arg.Any<CancellationToken>())
+        generated.MembersUpdateStatusAsync(Arg.Any<string>(), Arg.Any<UpdateMemberStatusRequest>(), Arg.Any<CancellationToken>())
             .Returns<Task>(_ => throw new ConferApiException(
                 "Not Found",
                 404,
@@ -139,7 +139,7 @@ public sealed class ApiMembersClientTests
             CancellationToken.None);
 
         Assert.True(success);
-        await generated.Received(1).RoleAsync(
+        await generated.Received(1).MembersUpdateRoleAsync(
             "member-1",
             Arg.Is<UpdateMemberRoleRequest>(x => x.Role == "Presenter"),
             Arg.Any<CancellationToken>());
@@ -149,7 +149,7 @@ public sealed class ApiMembersClientTests
     public async Task UpdateRoleAsync_WhenNotFound_ReturnsFalse()
     {
         var generated = Substitute.For<IMembersClient>();
-        generated.RoleAsync(Arg.Any<string>(), Arg.Any<UpdateMemberRoleRequest>(), Arg.Any<CancellationToken>())
+        generated.MembersUpdateRoleAsync(Arg.Any<string>(), Arg.Any<UpdateMemberRoleRequest>(), Arg.Any<CancellationToken>())
             .Returns<Task>(_ => throw new ConferApiException(
                 "Not Found",
                 404,
@@ -173,7 +173,7 @@ public sealed class ApiMembersClientTests
         var generated = Substitute.For<IMembersClient>();
         var createdAt = new DateTimeOffset(DateTime.UtcNow.AddDays(-1));
 
-        generated.MembersPOSTAsync(Arg.Any<CreateMemberRequest>(), Arg.Any<CancellationToken>())
+        generated.MembersCreateAsync(Arg.Any<CreateMemberRequest>(), Arg.Any<CancellationToken>())
             .Returns(new MemberResponse
             {
                 Id = "member-1",

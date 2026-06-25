@@ -12,7 +12,7 @@ public sealed class ApiAuthClientTests
         var generated = Substitute.For<IAuthClient>();
         var expiresAt = new DateTimeOffset(DateTime.UtcNow.AddMinutes(30));
 
-        generated.LoginAsync(Arg.Any<LoginRequest>(), Arg.Any<CancellationToken>())
+        generated.AuthLoginAsync(Arg.Any<LoginRequest>(), Arg.Any<CancellationToken>())
             .Returns(new LoginResponse
             {
                 AccessToken = "token",
@@ -39,7 +39,7 @@ public sealed class ApiAuthClientTests
     public async Task LoginAsync_WhenUnauthorized_ReturnsNull()
     {
         var generated = Substitute.For<IAuthClient>();
-        generated.LoginAsync(Arg.Any<LoginRequest>(), Arg.Any<CancellationToken>())
+        generated.AuthLoginAsync(Arg.Any<LoginRequest>(), Arg.Any<CancellationToken>())
             .Returns<Task<LoginResponse>>(_ => throw new ConferApiException(
                 "Unauthorized",
                 401,

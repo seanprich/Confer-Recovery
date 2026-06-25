@@ -12,7 +12,7 @@ public sealed class ApiRoomsClientTests
         var generated = Substitute.For<IRoomsClient>();
         var scheduledAt = new DateTimeOffset(DateTime.UtcNow.AddHours(3));
 
-        generated.RoomsAllAsync("chapter-1", Arg.Any<CancellationToken>())
+        generated.RoomsGetByChapterAsync("chapter-1", Arg.Any<CancellationToken>())
             .Returns(new List<RoomResponse>
             {
                 new()
@@ -44,7 +44,7 @@ public sealed class ApiRoomsClientTests
     public async Task GetByIdAsync_WhenNotFound_ReturnsNull()
     {
         var generated = Substitute.For<IRoomsClient>();
-        generated.RoomsGETAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        generated.RoomsGetByIdAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns<Task<RoomResponse>>(_ => throw new ConferApiException(
                 "Not Found",
                 404,
@@ -65,7 +65,7 @@ public sealed class ApiRoomsClientTests
         var generated = Substitute.For<IRoomsClient>();
         var startedAt = new DateTimeOffset(DateTime.UtcNow);
 
-        generated.RoomsGETAsync("room-1", Arg.Any<CancellationToken>())
+        generated.RoomsGetByIdAsync("room-1", Arg.Any<CancellationToken>())
             .Returns(new RoomResponse
             {
                 Id = "room-1",
@@ -96,7 +96,7 @@ public sealed class ApiRoomsClientTests
         var generated = Substitute.For<IRoomsClient>();
         var scheduledAt = new DateTimeOffset(DateTime.UtcNow.AddHours(1));
 
-        generated.RoomsPOSTAsync(Arg.Any<CreateRoomRequest>(), Arg.Any<CancellationToken>())
+        generated.RoomsCreateAsync(Arg.Any<CreateRoomRequest>(), Arg.Any<CancellationToken>())
             .Returns(new RoomResponse
             {
                 Id = "room-1",
@@ -127,7 +127,7 @@ public sealed class ApiRoomsClientTests
     {
         var generated = Substitute.For<IRoomsClient>();
 
-        generated.RoomsPOSTAsync(Arg.Any<CreateRoomRequest>(), Arg.Any<CancellationToken>())
+        generated.RoomsCreateAsync(Arg.Any<CreateRoomRequest>(), Arg.Any<CancellationToken>())
             .Returns(new RoomResponse
             {
                 Id = "room-2",
@@ -159,7 +159,7 @@ public sealed class ApiRoomsClientTests
         var generated = Substitute.For<IRoomsClient>();
         var startedAt = new DateTimeOffset(DateTime.UtcNow);
 
-        generated.StartAsync("room-1", Arg.Any<CancellationToken>())
+        generated.RoomsStartAsync("room-1", Arg.Any<CancellationToken>())
             .Returns(new RoomResponse
             {
                 Id = "room-1",
@@ -189,7 +189,7 @@ public sealed class ApiRoomsClientTests
         var generated = Substitute.For<IRoomsClient>();
         var endedAt = new DateTimeOffset(DateTime.UtcNow);
 
-        generated.EndAsync("room-1", Arg.Any<CancellationToken>())
+        generated.RoomsEndAsync("room-1", Arg.Any<CancellationToken>())
             .Returns(new RoomResponse
             {
                 Id = "room-1",
@@ -219,7 +219,7 @@ public sealed class ApiRoomsClientTests
         var generated = Substitute.For<IRoomsClient>();
         var expiresAt = new DateTimeOffset(DateTime.UtcNow.AddHours(2));
 
-        generated.JoinAsync("room-1", Arg.Any<CancellationToken>())
+        generated.RoomsJoinAsync("room-1", Arg.Any<CancellationToken>())
             .Returns(new JoinRoomResponse
             {
                 LiveKitToken = "lk-token",
